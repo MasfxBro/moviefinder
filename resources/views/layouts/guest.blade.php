@@ -10,6 +10,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans bg-bg text-text antialiased min-h-screen flex flex-col selection:bg-accent selection:text-text">
+        <x-offline-banner />
         <x-navbar :guest="true" />
 
         <main class="flex-1 flex flex-col sm:justify-center items-center pt-6 sm:pt-0 px-4">
