@@ -67,6 +67,12 @@ return [
 
     'timezone' => 'UTC',
 
+    'business_timezone' => env('BUSINESS_TIMEZONE', 'Asia/Jakarta'),
+
+    'build' => file_exists(base_path('BUILD_ID')) ? trim(file_get_contents(base_path('BUILD_ID'))) : 'dev',
+
+    'update_poll_minutes' => 5,
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
