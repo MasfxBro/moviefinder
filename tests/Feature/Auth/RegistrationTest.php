@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 test('registration screen can be rendered', function () {
     $response = $this->get('/register');
 
@@ -10,10 +12,79 @@ test('new users can register', function () {
     $response = $this->post('/register', [
         'name' => 'Test User',
         'email' => 'test@example.com',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'UniquePass2026!@#',
+        'password_confirmation' => 'UniquePass2026!@#',
+        'age_confirmed' => '1',
+        'terms_accepted' => '1',
     ]);
 
-    $this->assertAuthenticated();
     $response->assertRedirect(route('dashboard', absolute: false));
+
+    $user = User::where('email', 'test@example.com')->first();
+    expect($user)->not->toBeNull();
+    expect($user->age_confirmed_at)->not->toBeNull();
+});
+
+test('registration requires age confirmation', function () {
+    $response = $this->post('/register', [
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+        'password' => 'SecurePass123!',
+        'password_confirmation' => 'SecurePass123!',
+        'terms_accepted' => '1',
+    ]);
+
+    $response->assertSessionHasErrors('age_confirmed');
+    $this->assertGuest();
+});
+
+test('registration requires terms acceptance', function () {
+    $response = $this->post('/register', [
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+        'password' => 'SecurePass123!',
+        'password_confirmation' => 'SecurePass123!',
+        'age_confirmed' => '1',
+    ]);
+
+    $response->assertSessionHasErrors('terms_accepted');
+    $this->assertGuest();
+});
+
+test('password must be at least 10 characters', function () {
+    $response = $this->post('/register', [
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+        'password' => 'Short1!',
+        'password_confirmation' => 'Short1!',
+        'age_confirmed' => '1',
+        'terms_accepted' => '1',
+    ]);
+
+    $response->assertSessionHasErrors('password');
+    $this->assertGuest();
+});
+
+test('registration is throttled', function () {
+    for ($i = 0; $i < 6; $i++) {
+        $this->post('/register', [
+            'name' => 'Test User',
+            'email' => "test{$i}@example.com",
+            'password' => 'SecurePass123!',
+            'password_confirmation' => 'SecurePass123!',
+            'age_confirmed' => '1',
+            'terms_accepted' => '1',
+        ]);
+    }
+
+    $response = $this->post('/register', [
+        'name' => 'Test User',
+        'email' => 'final@example.com',
+        'password' => 'SecurePass123!',
+        'password_confirmation' => 'SecurePass123!',
+        'age_confirmed' => '1',
+        'terms_accepted' => '1',
+    ]);
+
+    $response->assertStatus(429);
 });

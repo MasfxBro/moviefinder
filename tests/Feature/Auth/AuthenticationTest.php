@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\User;
 
 test('login screen can be rendered', function () {
@@ -31,6 +32,18 @@ test('users can not authenticate with invalid password', function () {
     $this->assertGuest();
 });
 
+test('admin accounts cannot login through public login', function () {
+    $admin = User::factory()->create(['role' => Role::Admin]);
+
+    $response = $this->post('/login', [
+        'email' => $admin->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertGuest();
+    $response->assertSessionHasErrors('email');
+});
+
 test('users can logout', function () {
     $user = User::factory()->create();
 
@@ -38,4 +51,23 @@ test('users can logout', function () {
 
     $this->assertGuest();
     $response->assertRedirect('/');
+});
+
+test('login is throttled', function () {
+    $user = User::factory()->create();
+
+    for ($i = 0; $i < 5; $i++) {
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+    }
+
+    $response = $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $response->assertSessionHasErrors('email');
+    expect($response->exception->getMessage())->toContain('Too many');
 });

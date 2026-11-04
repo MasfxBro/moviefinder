@@ -34,6 +34,11 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
+        // Send new verification email if email was changed
+        if ($request->user()->wasChanged('email')) {
+            $request->user()->sendEmailVerificationNotification();
+        }
+
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 

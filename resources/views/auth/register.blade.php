@@ -39,6 +39,26 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        <!-- Age Confirmation -->
+        <div class="mt-4">
+            <label for="age_confirmed" class="inline-flex items-center">
+                <input id="age_confirmed" type="checkbox" name="age_confirmed" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" required {{ old('age_confirmed') ? 'checked' : '' }}>
+                <span class="ms-2 text-sm text-gray-600">I am 18 or older</span>
+            </label>
+            <x-input-error :messages="$errors->get('age_confirmed')" class="mt-2" />
+        </div>
+
+        <!-- Terms and Privacy -->
+        <div class="mt-4">
+            <label for="terms_accepted" class="inline-flex items-center">
+                <input id="terms_accepted" type="checkbox" name="terms_accepted" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" required {{ old('terms_accepted') ? 'checked' : '' }}>
+                <span class="ms-2 text-sm text-gray-600">
+                    I agree to the <a href="{{ route('terms') }}" class="underline text-indigo-600 hover:text-indigo-900" target="_blank">Terms of Service</a> and <a href="{{ route('privacy') }}" class="underline text-indigo-600 hover:text-indigo-900" target="_blank">Privacy Policy</a>
+                </span>
+            </label>
+            <x-input-error :messages="$errors->get('terms_accepted')" class="mt-2" />
+        </div>
+
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 {{ __('Already registered?') }}

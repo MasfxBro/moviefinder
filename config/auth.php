@@ -114,4 +114,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Unverified Account TTL
+    |--------------------------------------------------------------------------
+    |
+    | Number of days before unverified accounts are deleted by the
+    | users:prune-unverified command.
+    |
+    */
+
+    'unverified_ttl_days' => env('AUTH_UNVERIFIED_TTL_DAYS', 14),
+
 ];

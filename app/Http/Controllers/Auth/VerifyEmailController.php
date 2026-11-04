@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class VerifyEmailController extends Controller
 {
@@ -29,5 +30,16 @@ class VerifyEmailController extends Controller
         }
 
         return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+    }
+
+    /**
+     * Handle verification link from different browser (not authenticated).
+     */
+    public function handleUnauthenticated(Request $request): RedirectResponse
+    {
+        // Store intended URL to return after login
+        $request->session()->put('url.intended', $request->fullUrl());
+
+        return redirect()->route('login')->with('message', 'Please log in to verify your email address.');
     }
 }
