@@ -28,7 +28,7 @@ test('logged in user sees the home page instead of landing', function () {
 test('poster strip is hidden when catalog is empty', function () {
     // Ensure titles table exists but is empty
     if (Schema::hasTable('titles')) {
-        DB::table('titles')->truncate();
+        DB::table('titles')->delete();
     }
 
     $response = $this->get('/');

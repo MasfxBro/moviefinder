@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'tmdb' => [
+        'token' => env('TMDB_READ_TOKEN'),
+        'image_base' => env('TMDB_IMAGE_BASE', 'https://image.tmdb.org/t/p/'),
+    ],
+
 ];

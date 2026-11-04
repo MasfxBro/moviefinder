@@ -14,7 +14,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(\App\Contracts\MetadataProvider::class, function ($app) {
+            return new \App\Services\Tmdb\TmdbClient(
+                config('services.tmdb.token'),
+                new \App\Services\Tmdb\TmdbMapper(),
+            );
+        });
     }
 
     /**
