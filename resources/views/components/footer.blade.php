@@ -11,8 +11,10 @@
                 Privacy Policy
             </a>
         </div>
-        <div>
-            Film data provided by TMDB.
+        <div class="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+            <span>Film data provided by TMDB.</span>
+            <span class="hidden md:inline text-faint">|</span>
+            <span>Where-to-watch data provided by JustWatch.</span>
         </div>
     </div>
 </footer>
