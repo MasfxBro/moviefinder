@@ -10,10 +10,11 @@ use App\Enums\MediaType;
 class TmdbMapper
 {
     private const MAX_DIRECTORS = 3;
+
     private const MAX_CAST = 8;
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function mapToTitleData(array $data, MediaType $type): TitleData
     {
@@ -35,6 +36,12 @@ class TmdbMapper
         $cast = $this->extractCast($data);
         $videos = $this->extractVideos($data);
 
+        $rawGenres = $data['genre_ids'] ?? $data['genres'] ?? [];
+        $genreIds = array_map(
+            fn (mixed $item) => is_array($item) ? (int) $item['id'] : (int) $item,
+            $rawGenres
+        );
+
         return new TitleData(
             tmdbId: (int) $data['id'],
             type: $type,
@@ -47,14 +54,21 @@ class TmdbMapper
             voteAverage: isset($data['vote_average']) ? (float) $data['vote_average'] : null,
             directors: $directors,
             cast: $cast,
-            genreIds: array_map('intval', $data['genre_ids'] ?? $data['genres'] ?? []),
+            genreIds: $genreIds,
             videos: $videos,
             adult: (bool) ($data['adult'] ?? false),
+            tagline: $data['tagline'] ?? null,
+            runtimeMinutes: isset($data['runtime']) ? (int) $data['runtime'] : null,
+            seasonsCount: isset($data['number_of_seasons']) ? (int) $data['number_of_seasons'] : null,
+            episodesCount: isset($data['number_of_episodes']) ? (int) $data['number_of_episodes'] : null,
+            originalLanguage: $data['original_language'] ?? null,
+            voteCount: isset($data['vote_count']) ? (int) $data['vote_count'] : null,
+            popularity: isset($data['popularity']) ? (float) $data['popularity'] : null,
         );
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string>
      */
     private function extractDirectors(array $data, MediaType $type): array
@@ -83,7 +97,7 @@ class TmdbMapper
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string>
      */
     private function extractCast(array $data): array
@@ -99,7 +113,7 @@ class TmdbMapper
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string>
      */
     private function extractVideos(array $data): array

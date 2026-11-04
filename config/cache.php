@@ -129,8 +129,12 @@ return [
     | storage. By default, no PHP classes will be unserialized from your
     | cache to prevent gadget chain attacks if your APP_KEY is leaked.
     |
+    | Set to true because this application intentionally caches value objects
+    | (TitleData DTOs) and collections. Only trusted local code writes cache.
+    | ponytail: allow-list specific classes if cache becomes multi-writer.
+    |
     */
 
-    'serializable_classes' => false,
+    'serializable_classes' => true,
 
 ];

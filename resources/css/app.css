@@ -71,6 +71,15 @@
         border-bottom-width: 1px;
         border-right-width: 1px;
     }
+
+    /* Hide scrollbars for horizontal title rows */
+    .scrollbar-none::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-none {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 }
 
 

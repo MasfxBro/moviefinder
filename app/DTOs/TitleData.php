@@ -9,10 +9,10 @@ use App\Enums\MediaType;
 readonly class TitleData
 {
     /**
-     * @param array<string> $directors
-     * @param array<string> $cast
-     * @param array<int> $genreIds
-     * @param array<string> $videos
+     * @param  array<string>  $directors
+     * @param  array<string>  $cast
+     * @param  array<int>  $genreIds
+     * @param  array<string>  $videos
      */
     public function __construct(
         public int $tmdbId,
@@ -29,5 +29,12 @@ readonly class TitleData
         public array $genreIds,
         public array $videos,
         public bool $adult,
+        public ?string $tagline = null,
+        public ?int $runtimeMinutes = null,
+        public ?int $seasonsCount = null,
+        public ?int $episodesCount = null,
+        public ?string $originalLanguage = null,
+        public ?int $voteCount = null,
+        public ?float $popularity = null,
     ) {}
 }
