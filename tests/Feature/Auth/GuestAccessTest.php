@@ -14,6 +14,18 @@ test('guests can access public routes', function () {
     $this->get('/register')->assertStatus(200);
 });
 
+test('legal and attribution pages contain exact sentences', function () {
+    $this->get('/about')
+        ->assertStatus(200)
+        ->assertSee('This product uses the TMDB API but is not endorsed or certified by TMDB.')
+        ->assertSee('Where-to-watch data provided by JustWatch.');
+
+    $this->get('/')
+        ->assertStatus(200)
+        ->assertSee('This product uses the TMDB API but is not endorsed or certified by TMDB.')
+        ->assertSee('Where-to-watch data provided by JustWatch.');
+});
+
 test('guests cannot access protected routes', function () {
     $response = $this->get('/dashboard');
 
@@ -47,5 +59,6 @@ test('logged in user opening slash gets home not landing', function () {
 
     $response = $this->actingAs($user)->get('/');
 
-    $response->assertRedirect('/dashboard');
+    $response->assertStatus(200);
+    $response->assertViewIs('home');
 });
