@@ -3,6 +3,7 @@
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TitleDetailController;
 use App\Http\Controllers\TitleSearchController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,8 @@ require __DIR__.'/auth.php';
 // Protected routes (auth required, guests redirected to login)
 Route::middleware('auth')->group(function () {
     Route::get('/browse', BrowseController::class)->name('browse');
+    Route::get('/titles/{slug}', TitleDetailController::class)->name('titles.show');
+    Route::get('/search', [TitleSearchController::class, '__invoke'])->name('search');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

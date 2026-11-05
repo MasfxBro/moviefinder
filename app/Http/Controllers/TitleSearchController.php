@@ -7,13 +7,13 @@ namespace App\Http\Controllers;
 use App\Enums\MediaType;
 use App\Http\Resources\TitleSearchResource;
 use App\Models\Title;
-use App\Services\Tmdb\TmdbClient;
+use App\Contracts\MetadataProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TitleSearchController extends Controller
 {
-    public function __invoke(Request $request, TmdbClient $tmdb)
+    public function __invoke(Request $request, MetadataProvider $tmdb)
     {
         $term = $request->query('q', '');
         if (strlen($term) < 2) {

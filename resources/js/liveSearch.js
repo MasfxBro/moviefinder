@@ -86,6 +86,8 @@ export default function liveSearch() {
                 e.preventDefault();
                 if (this.focused >= 0 && this.results[this.focused]) {
                     this.select(this.results[this.focused]);
+                } else if (this.query.trim().length > 0) {
+                    window.location.href = `/search?q=${encodeURIComponent(this.query.trim())}`;
                 }
             } else if (e.key === 'Escape') {
                 this.open = false;
