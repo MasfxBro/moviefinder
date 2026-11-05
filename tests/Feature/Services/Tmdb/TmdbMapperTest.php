@@ -40,9 +40,9 @@ test('maps movie data correctly', function () {
         ],
         'videos' => [
             'results' => [
-                ['key' => 'abc123', 'site' => 'YouTube'],
-                ['key' => 'xyz789', 'site' => 'YouTube'],
-                ['key' => 'ignored', 'site' => 'Vimeo'],
+                ['key' => 'abc123', 'site' => 'YouTube', 'type' => 'Trailer'],
+                ['key' => 'xyz789', 'site' => 'YouTube', 'type' => 'Teaser'],
+                ['key' => 'ignored', 'site' => 'Vimeo', 'type' => 'Trailer'],
             ],
         ],
     ];
@@ -148,4 +148,54 @@ test('handles missing optional fields', function () {
         ->and($result->genreIds)->toBeEmpty()
         ->and($result->videos)->toBeEmpty()
         ->and($result->adult)->toBeFalse();
+});
+
+test('prioritizes official trailer over teaser and discards non-trailer types', function () {
+    $mapper = new TmdbMapper;
+
+    $data = [
+        'id' => 789,
+        'title' => 'Video Priority Movie',
+        'adult' => false,
+        'videos' => [
+            'results' => [
+                ['key' => 'bts123', 'site' => 'YouTube', 'type' => 'Behind the Scenes', 'official' => true],
+                ['key' => 'clip789', 'site' => 'YouTube', 'type' => 'Clip', 'official' => true],
+                ['key' => 'teaser456', 'site' => 'YouTube', 'type' => 'Teaser', 'official' => true],
+                ['key' => 'trailer_unofficial', 'site' => 'YouTube', 'type' => 'Trailer', 'official' => false],
+                ['key' => 'trailer_official', 'site' => 'YouTube', 'type' => 'Trailer', 'official' => true],
+                ['key' => 'vimeo_trailer', 'site' => 'Vimeo', 'type' => 'Trailer', 'official' => true],
+            ],
+        ],
+    ];
+
+    $result = $mapper->mapToTitleData($data, MediaType::Movie);
+
+    expect($result->videos)->toHaveCount(3)
+        ->and($result->videos[0])->toBe('trailer_official')
+        ->and($result->videos[1])->toBe('trailer_unofficial')
+        ->and($result->videos[2])->toBe('teaser456')
+        ->and($result->videos)->not->toContain('bts123')
+        ->and($result->videos)->not->toContain('clip789')
+        ->and($result->videos)->not->toContain('vimeo_trailer');
+});
+
+test('returns empty videos when tmdb only has clips or behind the scenes', function () {
+    $mapper = new TmdbMapper;
+
+    $data = [
+        'id' => 2316,
+        'name' => 'The Office',
+        'adult' => false,
+        'videos' => [
+            'results' => [
+                ['key' => 'HLZyi24Z90A', 'site' => 'YouTube', 'type' => 'Clip', 'official' => true],
+                ['key' => '96ix3P9WaRc', 'site' => 'YouTube', 'type' => 'Clip', 'official' => true],
+            ],
+        ],
+    ];
+
+    $result = $mapper->mapToTitleData($data, MediaType::Tv);
+
+    expect($result->videos)->toBeEmpty();
 });

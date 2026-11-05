@@ -178,3 +178,64 @@ test('unknown tmdb-only result imports once then redirects to slug', function ()
 
     $secondResponse->assertRedirect(route('titles.show', ['slug' => $imported->slug]));
 });
+
+test('trailer embed has no iframe in initial HTML and includes youtube-nocookie domain with notice and no autoplay', function () {
+    $title = Title::factory()->movie()->create([
+        'title' => 'Trailer Test Movie',
+        'slug' => 'trailer-test-movie',
+        'trailer_youtube_key' => 'dQw4w9WgXcQ',
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->get('/titles/trailer-test-movie');
+
+    $response->assertOk()
+        ->assertDontSee('<iframe', false)
+        ->assertSee('Playing loads content from YouTube')
+        ->assertSee('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0')
+        ->assertDontSee('autoplay=1');
+});
+
+test('trailer embed shows fallback search link when no trailer key exists', function () {
+    $title = Title::factory()->movie()->create([
+        'title' => 'No Trailer Movie',
+        'slug' => 'no-trailer-movie',
+        'trailer_youtube_key' => null,
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->get('/titles/no-trailer-movie');
+
+    $response->assertOk()
+        ->assertSee('No trailer available for this title')
+        ->assertSee('Search trailer on YouTube')
+        ->assertSee('https://www.youtube.com/results?search_query=No+Trailer+Movie+trailer');
+});
+
+test('where to watch shows provider names as text without logos and attribution present when providers are shown', function () {
+    $fakeMetadata = mock(MetadataProvider::class);
+    $fakeMetadata->shouldReceive('watchProviders')
+        ->with(99999, MediaType::Movie, 'ID')
+        ->once()
+        ->andReturn([
+            '8' => ['provider_name' => 'Netflix', 'logo_path' => '/netflix.jpg'],
+            '119' => ['provider_name' => 'Amazon Prime Video', 'logo_path' => '/prime.jpg'],
+        ]);
+    app()->instance(MetadataProvider::class, $fakeMetadata);
+
+    $title = Title::factory()->movie()->create([
+        'tmdb_id' => 99999,
+        'title' => 'Watch Providers Movie',
+        'slug' => 'watch-providers-movie',
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->get('/titles/watch-providers-movie');
+
+    $response->assertOk()
+        ->assertSee('Netflix')
+        ->assertSee('Amazon Prime Video')
+        ->assertSee('Where-to-watch data provided by JustWatch.')
+        ->assertDontSee('/netflix.jpg')
+        ->assertDontSee('/prime.jpg');
+});

@@ -120,9 +120,24 @@ class TmdbMapper
     {
         $videos = $data['videos']['results'] ?? [];
 
-        return array_map(
-            fn (array $video) => $video['key'],
-            array_filter($videos, fn (array $video) => ($video['site'] ?? '') === 'YouTube')
+        // Filter only YouTube videos of type Trailer or Teaser
+        $youtubeVideos = array_filter(
+            $videos,
+            fn (array $video) => ($video['site'] ?? '') === 'YouTube'
+                && in_array($video['type'] ?? '', ['Trailer', 'Teaser'], true)
         );
+
+        // Prioritize: official Trailer > Trailer > Teaser
+        usort($youtubeVideos, function (array $a, array $b) {
+            $priority = static fn (array $v): int => match (true) {
+                (($v['type'] ?? '') === 'Trailer' && ($v['official'] ?? false)) => 1,
+                (($v['type'] ?? '') === 'Trailer') => 2,
+                default => 3,
+            };
+
+            return $priority($a) <=> $priority($b);
+        });
+
+        return array_map(fn (array $video) => $video['key'], $youtubeVideos);
     }
 }

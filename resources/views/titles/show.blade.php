@@ -69,36 +69,27 @@
                     </section>
                 @endif
 
-                {{-- Trailer Slot (Reserved for T-15) --}}
+                {{-- Trailer Slot (T-15) --}}
                 <section id="trailer" class="bg-card border border-border rounded-2xl p-5 sm:p-6" aria-labelledby="trailer-heading">
                     <h2 id="trailer-heading" class="text-lg font-bold text-text mb-3">
                         Trailer
                     </h2>
                     <div id="trailer-slot">
-                        @if (filled($title->trailer_youtube_key))
-                            <div class="aspect-video rounded-xl bg-surface border border-border flex flex-col items-center justify-center p-6 text-center text-muted">
-                                <svg class="w-12 h-12 text-danger mb-2" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
-                                </svg>
-                                <p class="text-sm">Trailer player slot</p>
-                            </div>
-                        @else
-                            <div class="rounded-xl bg-surface border border-border p-6 text-center text-sm text-faint">
-                                No trailer available for this title
-                            </div>
-                        @endif
+                        <x-trailer-embed
+                            :youtube-key="$title->trailer_youtube_key"
+                            :title="$title->title"
+                            :backdrop-path="$title->backdrop_path"
+                        />
                     </div>
                 </section>
 
-                {{-- Where to watch Slot (Reserved for T-15) --}}
+                {{-- Where to watch Slot (T-15) --}}
                 <section id="where-to-watch" class="bg-card border border-border rounded-2xl p-5 sm:p-6" aria-labelledby="watch-heading">
                     <h2 id="watch-heading" class="text-lg font-bold text-text mb-3">
                         Where to watch
                     </h2>
                     <div id="where-to-watch-slot">
-                        <div class="rounded-xl bg-surface border border-border p-6 text-center text-sm text-faint">
-                            Where-to-watch availability slot
-                        </div>
+                        <x-where-to-watch :providers="$watchProviders" />
                     </div>
                 </section>
             </div>

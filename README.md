@@ -309,4 +309,4 @@ Add your chosen license here (for example MIT). Third-party data remains under t
 
 ## Author
 
-`<Your name>` — Junior Web Developer candidate.
+`Elmaliq S. A` — Junior Web Developer candidate.

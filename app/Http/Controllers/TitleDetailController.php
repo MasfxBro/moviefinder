@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\MetadataProvider;
 use App\Enums\MediaType;
 use App\Models\Title;
 use App\Services\Catalog\TitleImporter;
@@ -13,8 +14,12 @@ use Illuminate\View\View;
 
 class TitleDetailController extends Controller
 {
-    public function __invoke(Request $request, string $slug, TitleImporter $importer): View|RedirectResponse
-    {
+    public function __invoke(
+        Request $request,
+        string $slug,
+        TitleImporter $importer,
+        MetadataProvider $metadataProvider
+    ): View|RedirectResponse {
         if (preg_match('/^tmdb-(\d+)$/', $slug, $matches)) {
             $tmdbId = (int) $matches[1];
 
@@ -57,8 +62,20 @@ class TitleDetailController extends Controller
 
         $title->updateQuietly(['last_viewed_at' => now()]);
 
+        $watchProviders = [];
+        if ($title->tmdb_id) {
+            try {
+                $mediaType = MediaType::from($title->media_type);
+
+                $watchProviders = $metadataProvider->watchProviders((int) $title->tmdb_id, $mediaType, 'ID');
+            } catch (\Throwable) {
+                $watchProviders = [];
+            }
+        }
+
         return view('titles.show', [
             'title' => $title,
+            'watchProviders' => $watchProviders,
         ]);
     }
 }

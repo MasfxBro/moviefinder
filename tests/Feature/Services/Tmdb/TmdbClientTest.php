@@ -77,7 +77,7 @@ test('details includes credits and videos', function () {
                 'cast' => [['name' => 'Actor']],
             ],
             'videos' => [
-                'results' => [['key' => 'abc', 'site' => 'YouTube']],
+                'results' => [['key' => 'abc', 'site' => 'YouTube', 'type' => 'Trailer']],
             ],
         ]),
     ]);

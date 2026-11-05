@@ -141,14 +141,23 @@ class TmdbClient implements MetadataProvider
             $data = $this->request("{$type->value}/{$id}/watch/providers");
 
             $providers = $data['results'][$region] ?? [];
-            $flatrate = $providers['flatrate'] ?? [];
+            $allProviders = array_merge(
+                $providers['flatrate'] ?? [],
+                $providers['rent'] ?? [],
+                $providers['buy'] ?? [],
+                $providers['free'] ?? [],
+                $providers['ads'] ?? []
+            );
 
             $result = [];
-            foreach ($flatrate as $provider) {
-                $result[(string) $provider['provider_id']] = [
-                    'logo_path' => $provider['logo_path'],
-                    'provider_name' => $provider['provider_name'],
-                ];
+            foreach ($allProviders as $provider) {
+                $providerId = (string) $provider['provider_id'];
+                if (! isset($result[$providerId])) {
+                    $result[$providerId] = [
+                        'logo_path' => $provider['logo_path'] ?? null,
+                        'provider_name' => $provider['provider_name'],
+                    ];
+                }
             }
 
             return $result;
