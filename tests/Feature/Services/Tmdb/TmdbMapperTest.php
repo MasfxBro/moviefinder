@@ -6,7 +6,7 @@ use App\Enums\MediaType;
 use App\Services\Tmdb\TmdbMapper;
 
 test('maps movie data correctly', function () {
-    $mapper = new TmdbMapper();
+    $mapper = new TmdbMapper;
 
     $data = [
         'id' => 123,
@@ -70,7 +70,7 @@ test('maps movie data correctly', function () {
 });
 
 test('maps tv show data correctly', function () {
-    $mapper = new TmdbMapper();
+    $mapper = new TmdbMapper;
 
     $data = [
         'id' => 456,
@@ -112,7 +112,7 @@ test('maps tv show data correctly', function () {
 });
 
 test('drops adult content', function () {
-    $mapper = new TmdbMapper();
+    $mapper = new TmdbMapper;
 
     $data = [
         'id' => 999,
@@ -126,7 +126,7 @@ test('drops adult content', function () {
 });
 
 test('handles missing optional fields', function () {
-    $mapper = new TmdbMapper();
+    $mapper = new TmdbMapper;
 
     $data = [
         'id' => 111,

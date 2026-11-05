@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Tmdb;
 
-class TmdbNotFoundException extends TmdbException
-{
-}
+class TmdbNotFoundException extends TmdbException {}

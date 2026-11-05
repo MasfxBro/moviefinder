@@ -29,6 +29,10 @@
             <div class="flex-1 max-w-md hidden sm:block">
                 {{ $search }}
             </div>
+        @elseif (! $guest && auth()->check())
+            <div class="flex-1 max-w-md hidden sm:block">
+                <x-search-bar />
+            </div>
         @endif
 
         {{-- Right: Actions & User Menu / Guest links --}}

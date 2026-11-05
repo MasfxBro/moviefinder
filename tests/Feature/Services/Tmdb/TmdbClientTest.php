@@ -7,12 +7,13 @@ use App\Exceptions\Tmdb\TmdbConnectionException;
 use App\Exceptions\Tmdb\TmdbNotFoundException;
 use App\Services\Tmdb\TmdbClient;
 use App\Services\Tmdb\TmdbMapper;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
     Cache::flush();
-    $this->mapper = new TmdbMapper();
+    $this->mapper = new TmdbMapper;
     $this->client = new TmdbClient('test-token', $this->mapper);
 });
 
@@ -98,7 +99,7 @@ test('handles 404 errors', function () {
 
 test('handles connection timeout with retry', function () {
     Http::fake(function () {
-        throw new \Illuminate\Http\Client\ConnectionException('Timeout');
+        throw new ConnectionException('Timeout');
     });
 
     $this->client->search('test', MediaType::Movie);

@@ -17,7 +17,9 @@ class TitleSearchController extends Controller
     {
         $term = $request->query('q', '');
         if (strlen($term) < 2) {
-            return response()->json([]);
+            return $request->expectsJson()
+                ? response()->json([])
+                : view('search', ['results' => collect()]);
         }
         $escaped = addcslashes($term, '%_');
         $local = Title::query()
@@ -28,15 +30,12 @@ class TitleSearchController extends Controller
             ->limit(10)
             ->get();
         if ($local->isNotEmpty()) {
-            return TitleSearchResource::collection($local);
-        }
-        // TMDB fallback (cached in client)
-        $tmdbResults = $tmdb->search($term, MediaType::Movie);
-        $collection = collect($tmdbResults)->map(function ($item) {
-            $item['not_in_catalog'] = true;
+            if ($request->expectsJson()) {
+                return TitleSearchResource::collection($local);
+            }
 
-            return $item;
-        });
+            return view('search', ['results' => $local]);
+        }
         // record miss counter
         DB::table('search_misses')
             ->updateOrInsert(
@@ -47,7 +46,18 @@ class TitleSearchController extends Controller
                     'status' => 'open',
                 ]
             );
+        if ($request->expectsJson()) {
+            // TMDB fallback (cached in client)
+            $tmdbResults = $tmdb->search($term, MediaType::Movie);
+            $collection = collect($tmdbResults)->map(function ($item) {
+                $item['not_in_catalog'] = true;
 
-        return response()->json($collection);
+                return $item;
+            });
+
+            return response()->json($collection);
+        }
+
+        return view('search', ['results' => collect()]);
     }
 }

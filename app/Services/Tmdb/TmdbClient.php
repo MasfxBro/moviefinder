@@ -19,9 +19,13 @@ use Illuminate\Support\Facades\RateLimiter;
 class TmdbClient implements MetadataProvider
 {
     private const BASE_URL = 'https://api.themoviedb.org/3';
+
     private const TIMEOUT = 8;
+
     private const MAX_RETRIES = 2;
+
     private const CACHE_TTL = 86400; // 24h
+
     private const RATE_LIMIT = 10; // req/s
 
     public function __construct(
@@ -31,7 +35,7 @@ class TmdbClient implements MetadataProvider
 
     public function search(string $query, MediaType $type): array
     {
-        $cacheKey = "tmdb:search:{$type->value}:" . md5($query);
+        $cacheKey = "tmdb:search:{$type->value}:".md5($query);
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($query, $type) {
             $data = $this->request("search/{$type->value}", [
@@ -39,7 +43,7 @@ class TmdbClient implements MetadataProvider
                 'include_adult' => 'false',
             ]);
 
-            $filtered = array_filter($data['results'] ?? [], fn (array $item) => !($item['adult'] ?? false));
+            $filtered = array_filter($data['results'] ?? [], fn (array $item) => ! ($item['adult'] ?? false));
 
             return array_values(array_map(
                 fn (array $item) => $this->mapper->mapToTitleData($item, $type),
@@ -68,7 +72,7 @@ class TmdbClient implements MetadataProvider
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($type) {
             $data = $this->request("trending/{$type->value}/week");
 
-            $filtered = array_filter($data['results'] ?? [], fn (array $item) => !($item['adult'] ?? false));
+            $filtered = array_filter($data['results'] ?? [], fn (array $item) => ! ($item['adult'] ?? false));
 
             return array_values(array_map(
                 fn (array $item) => $this->mapper->mapToTitleData($item, $type),
@@ -86,7 +90,7 @@ class TmdbClient implements MetadataProvider
                 'include_adult' => 'false',
             ]);
 
-            $filtered = array_filter($data['results'] ?? [], fn (array $item) => !($item['adult'] ?? false));
+            $filtered = array_filter($data['results'] ?? [], fn (array $item) => ! ($item['adult'] ?? false));
 
             return array_values(array_map(
                 fn (array $item) => $this->mapper->mapToTitleData($item, $type),
@@ -104,7 +108,7 @@ class TmdbClient implements MetadataProvider
                 'include_adult' => 'false',
             ]);
 
-            $filtered = array_filter($data['results'] ?? [], fn (array $item) => !($item['adult'] ?? false));
+            $filtered = array_filter($data['results'] ?? [], fn (array $item) => ! ($item['adult'] ?? false));
 
             return array_values(array_map(
                 fn (array $item) => $this->mapper->mapToTitleData($item, $type),
@@ -152,7 +156,7 @@ class TmdbClient implements MetadataProvider
     }
 
     /**
-     * @param array<string, mixed> $params
+     * @param  array<string, mixed>  $params
      * @return array<string, mixed>
      */
     private function request(string $endpoint, array $params = []): array
@@ -164,7 +168,7 @@ class TmdbClient implements MetadataProvider
 
         while ($attempt < self::MAX_RETRIES) {
             try {
-                $response = $this->http()->get(self::BASE_URL . '/' . $endpoint, $params);
+                $response = $this->http()->get(self::BASE_URL.'/'.$endpoint, $params);
 
                 if ($response->status() === 404) {
                     throw new TmdbNotFoundException('Resource not found');

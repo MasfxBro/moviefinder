@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Title;
-use App\Http\Resources\TitleSearchResource;
-use App\Services\Tmdb\TmdbClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -59,7 +57,7 @@ class TitleSearchTest extends TestCase
     /** @test */
     public function miss_counter_increments_when_no_results(): void
     {
-        Http::fake([ '*' => Http::response(['results' => []], 200), ]);
+        Http::fake(['*' => Http::response(['results' => []], 200)]);
         $this->assertDatabaseMissing('search_misses', ['query_norm' => 'nothing']);
         $this->getJson('/search?q=nothing');
         $this->assertDatabaseHas('search_misses', ['query_norm' => 'nothing', 'hits' => 1]);

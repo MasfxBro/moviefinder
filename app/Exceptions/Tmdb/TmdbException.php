@@ -6,6 +6,4 @@ namespace App\Exceptions\Tmdb;
 
 use Exception;
 
-class TmdbException extends Exception
-{
-}
+class TmdbException extends Exception {}

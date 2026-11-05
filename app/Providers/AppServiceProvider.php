@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\MetadataProvider;
+use App\Services\Tmdb\TmdbClient;
+use App\Services\Tmdb\TmdbMapper;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -14,10 +17,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(\App\Contracts\MetadataProvider::class, function ($app) {
-            return new \App\Services\Tmdb\TmdbClient(
+        $this->app->singleton(MetadataProvider::class, function ($app) {
+            return new TmdbClient(
                 config('services.tmdb.token'),
-                new \App\Services\Tmdb\TmdbMapper(),
+                new TmdbMapper,
             );
         });
     }
