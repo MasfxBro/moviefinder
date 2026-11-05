@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(SetRequestId::class);
-        $middleware->appendToGroup('auth', EnsureUserNotSuspended::class);
+        $middleware->appendToGroup('web', EnsureUserNotSuspended::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->context(function () {

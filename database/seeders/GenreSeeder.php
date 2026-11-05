@@ -46,6 +46,6 @@ class GenreSeeder extends Seeder
             ['id' => 37, 'name' => 'Western', 'media_scope' => 'both'],
         ];
 
-        DB::table('genres')->insert($genres);
+        DB::table('genres')->upsert($genres, ['id'], ['name', 'media_scope']);
     }
 }

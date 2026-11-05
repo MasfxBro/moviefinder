@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +22,10 @@ Route::get('/version', function () {
 require __DIR__.'/auth.php';
 
 // Protected routes (auth required, guests redirected to login)
+Route::middleware('auth')->group(function () {
+    Route::get('/browse', BrowseController::class)->name('browse');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
