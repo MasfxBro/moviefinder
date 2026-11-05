@@ -46,6 +46,7 @@ return new class extends Migration
             $table->index('vote_average');
             $table->index('synced_at');
             $table->fullText(['title', 'original_title']);
+            // fulltext already present
         });
     }
 
