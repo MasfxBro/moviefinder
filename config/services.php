@@ -40,4 +40,9 @@ return [
         'image_base' => env('TMDB_IMAGE_BASE', 'https://image.tmdb.org/t/p/'),
     ],
 
+    'gemini' => [
+        'free_key' => env('GEMINI_API_KEY_FREE'),
+        'paid_key' => env('GEMINI_API_KEY_PAID'),
+    ],
+
 ];

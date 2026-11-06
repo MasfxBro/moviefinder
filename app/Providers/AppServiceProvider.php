@@ -2,7 +2,12 @@
 
 namespace App\Providers;
 
+use App\Contracts\LlmClient;
 use App\Contracts\MetadataProvider;
+use App\Contracts\PlanResolver;
+use App\Services\Ai\FakeLlmClient;
+use App\Services\Ai\FreePlanResolver;
+use App\Services\Ai\GeminiClient;
 use App\Services\Tmdb\TmdbClient;
 use App\Services\Tmdb\TmdbMapper;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -23,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
                 new TmdbMapper,
             );
         });
+
+        $this->app->bind(LlmClient::class, fn () => config('ai.driver') === 'fake' ? new FakeLlmClient : new GeminiClient);
+        $this->app->bind(PlanResolver::class, FreePlanResolver::class);
     }
 
     /**

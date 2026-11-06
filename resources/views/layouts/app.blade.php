@@ -11,6 +11,9 @@
     </head>
     <body class="font-sans bg-bg text-text antialiased min-h-screen flex flex-col selection:bg-accent selection:text-text">
         <x-offline-banner />
+        @if (config('ai.driver') === 'fake')
+            <x-ai-demo-banner class="mx-4 mt-3 sm:mx-6 lg:mx-8" />
+        @endif
         <x-navbar />
 
         @isset($header)
