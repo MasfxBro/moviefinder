@@ -8,6 +8,7 @@ use App\Contracts\MetadataProvider;
 use App\Enums\MediaType;
 use App\Exceptions\Tmdb\TmdbNotFoundException;
 use App\Models\Title;
+use Illuminate\Support\Facades\Log;
 
 class CatalogService
 {
@@ -23,19 +24,20 @@ class CatalogService
 
     public function seedPopular(int $limitPerType = 20): int
     {
+        $limitPerType = $this->validatedLimit($limitPerType);
         $count = 0;
 
         foreach ([MediaType::Movie, MediaType::Tv] as $type) {
-            $popular = $this->metadataProvider->popular($type);
-            $items = array_slice($popular, 0, $limitPerType);
-
-            foreach ($items as $item) {
+            foreach (array_slice($this->metadataProvider->popular($type), 0, $limitPerType) as $item) {
                 try {
                     $this->importer->import($item->tmdbId, $type, bypassThrottle: true);
                     $count++;
-                } catch (\Throwable $e) {
-                    // Skip invalid or adult titles during seed
-                    continue;
+                } catch (\Throwable $exception) {
+                    Log::warning('Catalog seed import failed.', [
+                        'tmdb_id' => $item->tmdbId,
+                        'media_type' => $type->value,
+                        'exception' => $exception::class,
+                    ]);
                 }
             }
         }
@@ -45,14 +47,19 @@ class CatalogService
 
     public function refresh(int $limit = 100): int
     {
-        $titles = Title::where('source', 'tmdb')
+        $limit = $this->validatedLimit($limit);
+        $ageDays = (int) config('catalog.max_refresh_age_days', 150);
+        $titles = Title::query()
+            ->where('source', 'tmdb')
+            ->where(function ($query) use ($ageDays): void {
+                $query->whereNull('synced_at')->orWhere('synced_at', '<=', now()->subDays($ageDays));
+            })
             ->orderByRaw('synced_at IS NULL DESC')
-            ->orderBy('synced_at', 'asc')
+            ->orderBy('synced_at')
             ->limit($limit)
-            ->get();
+            ->get(['id', 'tmdb_id', 'media_type']);
 
         $count = 0;
-
         foreach ($titles as $title) {
             if ($title->tmdb_id === null) {
                 continue;
@@ -62,19 +69,34 @@ class CatalogService
                 $this->importer->import(
                     $title->tmdb_id,
                     MediaType::from($title->media_type),
-                    bypassThrottle: true
+                    bypassThrottle: true,
+                    forceRefresh: true,
                 );
                 $count++;
-            } catch (TmdbNotFoundException $e) {
+            } catch (TmdbNotFoundException $exception) {
                 $title->is_hidden = true;
                 $title->save();
                 $count++;
-            } catch (\Throwable $e) {
-                // Continue on other errors
-                continue;
+            } catch (\Throwable $exception) {
+                Log::warning('Catalog refresh failed.', [
+                    'title_id' => $title->id,
+                    'tmdb_id' => $title->tmdb_id,
+                    'media_type' => $title->media_type,
+                    'exception' => $exception::class,
+                ]);
             }
         }
 
         return $count;
+    }
+
+    private function validatedLimit(int $limit): int
+    {
+        $maximum = (int) config('catalog.max_command_limit', 500);
+        if ($limit < 1 || $limit > $maximum) {
+            throw new \InvalidArgumentException("Catalog limit must be between 1 and {$maximum}.");
+        }
+
+        return $limit;
     }
 }

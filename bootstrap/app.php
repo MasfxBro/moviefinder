@@ -6,6 +6,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Str;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -16,7 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(SetRequestId::class);
-        $middleware->appendToGroup('web', EnsureUserNotSuspended::class);
+        $middleware->appendToGroup('web', [
+            AuthenticateSession::class,
+            EnsureUserNotSuspended::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->context(function () {

@@ -16,6 +16,8 @@ interface MetadataProvider
 
     public function details(int $id, MediaType $type): TitleData;
 
+    public function refreshDetails(int $id, MediaType $type): TitleData;
+
     /**
      * @return array<TitleData>
      */

@@ -27,7 +27,6 @@ require __DIR__.'/auth.php';
 Route::middleware('auth')->group(function () {
     Route::get('/browse', BrowseController::class)->name('browse');
     Route::get('/titles/{slug}', TitleDetailController::class)->name('titles.show');
-    Route::get('/search', [TitleSearchController::class, '__invoke'])->name('search');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

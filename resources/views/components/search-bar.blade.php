@@ -1,14 +1,15 @@
 @props([
     'placeholder' => 'Search titles',
+    'inputRef' => 'input',
 ])
 
-<div x-data="liveSearch()" class="relative inline-block w-full max-w-md">
+<div x-data="liveSearch()" x-on:keydown.window="shortcut($event)" class="relative inline-block w-full max-w-md">
     <input
         type="search"
-        ref="input"
+        x-ref="{{ $inputRef }}"
         x-model="query"
         x-on:keydown="keydown($event)"
-        x-on:focus="open = true"
+        x-on:focus="open = query.length >= 2"
         x-on:blur="setTimeout(() => open = false, 150)"
         placeholder="{{ $placeholder }}"
         class="w-full min-h-[44px] px-3 py-2 bg-card border border-border rounded-xl text-text placeholder-muted text-[16px] sm:text-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
@@ -16,7 +17,7 @@
     />
 
     <div
-        x-show="open && (results.length > 0 || loading || error)"
+        x-show="open && (results.length > 0 || loading || error || query.length >= 2)"
         x-transition:enter="ease-out duration-150"
         x-transition:enter-start="opacity-0 translate-y-1"
         x-transition:enter-end="opacity-100 translate-y-0"

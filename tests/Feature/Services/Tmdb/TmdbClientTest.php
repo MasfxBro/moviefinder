@@ -51,6 +51,19 @@ test('search filters adult content', function () {
     });
 });
 
+test('search cache normalizes whitespace and case', function () {
+    Http::fake([
+        'api.themoviedb.org/3/search/movie*' => Http::response(['results' => [
+            ['id' => 1, 'title' => 'Movie', 'adult' => false],
+        ]]),
+    ]);
+
+    $this->client->search('Test', MediaType::Movie);
+    $this->client->search(' test ', MediaType::Movie);
+
+    Http::assertSentCount(1);
+});
+
 test('search results are cached', function () {
     Http::fake([
         'api.themoviedb.org/3/search/movie*' => Http::response([
@@ -64,6 +77,19 @@ test('search results are cached', function () {
     $this->client->search('test', MediaType::Movie);
 
     Http::assertSentCount(1);
+});
+
+test('refreshDetails bypasses cached details', function () {
+    Http::fake([
+        '*' => Http::sequence()
+            ->push(['id' => 123, 'title' => 'Old title'])
+            ->push(['id' => 123, 'title' => 'Fresh title']),
+    ]);
+
+    expect($this->client->details(123, MediaType::Movie)->title)->toBe('Old title')
+        ->and($this->client->refreshDetails(123, MediaType::Movie)->title)->toBe('Fresh title');
+
+    Http::assertSentCount(2);
 });
 
 test('details includes credits and videos', function () {

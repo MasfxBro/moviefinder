@@ -8,6 +8,21 @@ test('registration screen can be rendered', function () {
     $response->assertStatus(200);
 });
 
+test('registration setting blocks account creation', function () {
+    config(['features.registration_open' => false]);
+
+    $this->post('/register', [
+        'name' => 'Blocked User',
+        'email' => 'blocked@example.com',
+        'password' => 'UniquePass2026!@#',
+        'password_confirmation' => 'UniquePass2026!@#',
+        'age_confirmed' => '1',
+        'terms_accepted' => '1',
+    ])->assertNotFound();
+
+    expect(User::where('email', 'blocked@example.com')->exists())->toBeFalse();
+});
+
 test('new users can register', function () {
     $response = $this->post('/register', [
         'name' => 'Test User',

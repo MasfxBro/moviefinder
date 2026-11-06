@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Models\User;
+use Illuminate\Support\Facades\RateLimiter;
 
 test('login screen can be rendered', function () {
     $response = $this->get('/login');
@@ -51,6 +52,39 @@ test('users can logout', function () {
 
     $this->assertGuest();
     $response->assertRedirect('/');
+});
+
+test('suspended users receive the generic invalid credentials error', function () {
+    $user = User::factory()->create(['suspended_at' => now()]);
+
+    $response = $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertGuest();
+    $response->assertSessionHasErrors('email');
+    expect($response->exception->errors()['email'][0])->toBe(trans('auth.failed'));
+});
+
+test('login failures trigger progressive delay', function () {
+    $user = User::factory()->create();
+
+    foreach (range(1, 3) as $attempt) {
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+    }
+
+    $response = $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $response->assertSessionHasErrors('email');
+    expect($response->exception->errors()['email'][0])->toContain('3 seconds');
+    expect(RateLimiter::attempts('login-delay:'.strtolower($user->email).'|127.0.0.1'))->toBeGreaterThan(0);
 });
 
 test('login is throttled', function () {

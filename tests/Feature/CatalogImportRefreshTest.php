@@ -92,11 +92,11 @@ test('refresh respects locked_fields', function () {
         'title' => 'Original Admin Title',
         'overview' => 'Original Overview',
         'locked_fields' => ['title'],
-        'synced_at' => now()->subDays(10),
+        'synced_at' => now()->subDays(151),
     ]);
 
     $mockProvider = Mockery::mock(MetadataProvider::class);
-    $mockProvider->shouldReceive('details')
+    $mockProvider->shouldReceive('refreshDetails')
         ->with(202, MediaType::Movie)
         ->andReturn(new TitleData(
             tmdbId: 202,
@@ -135,11 +135,11 @@ test('404 hides the title', function () {
         'media_type' => 'movie',
         'title' => 'Deleted Movie',
         'is_hidden' => false,
-        'synced_at' => now()->subDays(30),
+        'synced_at' => now()->subDays(151),
     ]);
 
     $mockProvider = Mockery::mock(MetadataProvider::class);
-    $mockProvider->shouldReceive('details')
+    $mockProvider->shouldReceive('refreshDetails')
         ->with(404001, MediaType::Movie)
         ->andThrow(new TmdbNotFoundException('Not found on TMDB'));
 
@@ -155,8 +155,8 @@ test('404 hides the title', function () {
 test('importer throttles requests', function () {
     $mockProvider = Mockery::mock(MetadataProvider::class);
     $mockProvider->shouldReceive('details')
-        ->andReturn(new TitleData(
-            tmdbId: 1,
+        ->andReturnUsing(fn (int $id): TitleData => new TitleData(
+            tmdbId: $id,
             type: MediaType::Movie,
             title: 'Sample',
             originalTitle: 'Sample',

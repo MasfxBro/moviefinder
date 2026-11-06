@@ -23,17 +23,25 @@ test('guest is redirected to login from search page', function () {
     $this->get('/search?q=Matrix')->assertRedirect(route('login'));
 });
 
-test('search page renders results', function () {
+test('unverified users are redirected from the search page', function () {
+    $user = User::factory()->unverified()->create();
+
+    $this->actingAs($user)
+        ->get('/search?q=Matrix')
+        ->assertRedirect('/verify-email');
+});
+
+test('search endpoint returns results', function () {
     $user = User::factory()->create();
 
     Title::factory()->create(['title' => 'The Matrix', 'media_type' => 'movie', 'release_year' => 1999]);
 
-    $response = $this->actingAs($user)->get('/search?q=Matrix');
+    $response = $this->actingAs($user)->getJson('/search?q=Matrix');
 
     $response->assertOk()
-        ->assertViewIs('search')
-        ->assertSee('The Matrix')
-        ->assertSee('1999');
+        ->assertJsonFragment(['title' => 'The Matrix'])
+        ->assertJsonFragment(['release_year' => 1999])
+        ->assertJsonFragment(['slug' => 'the-matrix-1999']);
 });
 
 test('search page renders not-found state with request button', function () {
@@ -51,12 +59,26 @@ test('search page renders not-found state with request button', function () {
         ->assertSee('Request this title');
 });
 
-test('search page requires at least 2 characters', function () {
+test('search endpoint returns JSON suggestions for prefix and substring matches', function () {
     $user = User::factory()->create();
+    Title::factory()->create(['title' => 'Spider-Man', 'popularity' => 10]);
+    Title::factory()->create(['title' => 'A Special Story', 'popularity' => 50]);
 
-    $response = $this->actingAs($user)->get('/search?q=M');
+    $response = $this->actingAs($user)->getJson('/search?q=sp');
 
     $response->assertOk()
-        ->assertViewIs('search')
-        ->assertDontSee('The Matrix');
+        ->assertJsonPath('data.0.title', 'A Special Story')
+        ->assertJsonFragment(['title' => 'Spider-Man']);
+});
+
+test('single-character search returns matching catalog titles', function () {
+    $user = User::factory()->create();
+    Title::factory()->create(['title' => 'Spider-Man', 'original_title' => null, 'popularity' => 50]);
+    Title::factory()->create(['title' => 'Batman', 'original_title' => null, 'popularity' => 10]);
+
+    $response = $this->actingAs($user)->getJson('/search?q=s');
+
+    $response->assertOk()
+        ->assertJsonPath('data.0.title', 'Spider-Man')
+        ->assertJsonMissing(['title' => 'Batman']);
 });

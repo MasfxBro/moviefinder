@@ -28,7 +28,16 @@ class CatalogRefresh extends Command
      */
     public function handle(CatalogService $catalogService): int
     {
-        $limit = (int) $this->option('limit');
+        $option = filter_var($this->option('limit'), FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1, 'max_range' => (int) config('catalog.max_command_limit', 500)],
+        ]);
+        if ($option === false) {
+            $this->error('The limit must be a positive integer within the configured maximum.');
+
+            return Command::INVALID;
+        }
+
+        $limit = $option;
         $this->info("Refreshing up to {$limit} oldest TMDB titles...");
 
         $count = $catalogService->refresh($limit);

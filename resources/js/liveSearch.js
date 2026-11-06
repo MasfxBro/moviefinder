@@ -9,43 +9,55 @@ export default function liveSearch() {
         endpoint: '/search',
 
         init() {
-            this.$watch('query', this.debouncedSearch);
-            this.$nextTick(() => {
+            this.$watch('query', (value) => this.debouncedSearch(value));
+        },
+
+        shortcut(event) {
+            const target = event.target;
+            const isTyping = target instanceof HTMLElement
+                && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+
+            if (event.key === '/' && ! isTyping && this.$el.offsetParent !== null) {
+                event.preventDefault();
                 this.$refs.input?.focus();
-            });
+            }
         },
 
         focusInput() {
             this.$refs.input?.focus();
         },
 
-        debouncedSearch: (() => {
-            let timer;
-            return function (value) {
-                clearTimeout(timer);
-                if (value.length < 2) {
-                    this.results = [];
-                    this.open = false;
-                    this.loading = false;
-                    this.error = false;
-                    return;
-                }
-                this.loading = true;
+        debounceTimer: null,
+
+        debouncedSearch(value) {
+            clearTimeout(this.debounceTimer);
+            if (value.trim().length < 2) {
+                this.results = [];
+                this.open = false;
+                this.loading = false;
                 this.error = false;
-                this.open = true;
-                this.focused = -1;
-                timer = setTimeout(() => this.search(value), 300);
-            };
-        })(),
+                return;
+            }
+            this.loading = true;
+            this.error = false;
+            this.open = true;
+            this.focused = -1;
+            this.debounceTimer = setTimeout(() => this.search(value.trim()), 300);
+        },
 
         async search(value) {
             try {
-                const res = await fetch(`${this.endpoint}?q=${encodeURIComponent(value)}`);
+                const res = await fetch(`${this.endpoint}?q=${encodeURIComponent(value)}`, {
+                    headers: { Accept: 'application/json' },
+                });
                 if (!res.ok) throw new Error('Request failed');
-                this.results = await res.json();
+                const payload = await res.json();
+                this.results = Array.isArray(payload)
+                    ? payload
+                    : (Array.isArray(payload.data) ? payload.data : (payload.data?.data ?? []));
                 this.loading = false;
                 this.error = false;
-                this.open = this.results.length > 0;
+                this.open = true;
             } catch {
                 this.loading = false;
                 this.error = true;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,7 +29,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string'],
         ];
     }
@@ -42,8 +43,15 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $email = Str::lower($this->string('email')->trim()->toString());
+        $user = User::where('email', $email)->first();
+
+        if ($user?->suspended_at !== null || ! Auth::attempt([
+            'email' => $email,
+            'password' => $this->string('password')->toString(),
+        ], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
+            $this->applyProgressiveDelay();
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
@@ -54,6 +62,7 @@ class LoginRequest extends FormRequest
         if (Auth::user()->isAdmin()) {
             Auth::logout();
             RateLimiter::hit($this->throttleKey());
+            $this->applyProgressiveDelay();
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
@@ -61,6 +70,7 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+        RateLimiter::clear($this->delayKey());
     }
 
     /**
@@ -70,20 +80,71 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
-            return;
+        $delayKey = $this->delayKey();
+
+        if (RateLimiter::tooManyAttempts($delayKey, 1)) {
+            $seconds = RateLimiter::availableIn($delayKey);
+
+            throw ValidationException::withMessages([
+                'email' => trans('auth.throttle', [
+                    'seconds' => $seconds,
+                    'minutes' => ceil($seconds / 60),
+                ]),
+            ]);
         }
 
-        event(new Lockout($this));
+        $key = $this->throttleKey();
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            event(new Lockout($this));
 
-        throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
-        ]);
+            $seconds = RateLimiter::availableIn($key);
+
+            throw ValidationException::withMessages([
+                'email' => trans('auth.throttle', [
+                    'seconds' => $seconds,
+                    'minutes' => ceil($seconds / 60),
+                ]),
+            ]);
+        }
+
+        $attempts = RateLimiter::attempts($key);
+        $delay = match (true) {
+            $attempts >= 4 => 30,
+            $attempts >= 3 => 10,
+            $attempts >= 2 => 3,
+            default => 0,
+        };
+
+        if ($delay > 0) {
+            throw ValidationException::withMessages([
+                'email' => trans('auth.throttle', [
+                    'seconds' => $delay,
+                    'minutes' => ceil($delay / 60),
+                ]),
+            ]);
+        }
+    }
+
+    private function delayKey(): string
+    {
+        return 'login-delay:'.$this->throttleKey();
+    }
+
+    private function applyProgressiveDelay(): void
+    {
+        $attempts = RateLimiter::attempts($this->throttleKey());
+        $decaySeconds = match (true) {
+            $attempts >= 5 => 60,
+            $attempts === 4 => 30,
+            $attempts === 3 => 10,
+            $attempts === 2 => 3,
+            default => 0,
+        };
+
+        if ($decaySeconds > 0) {
+            RateLimiter::hit($this->delayKey(), $decaySeconds);
+        }
     }
 
     /**

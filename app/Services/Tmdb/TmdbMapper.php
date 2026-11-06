@@ -18,9 +18,16 @@ class TmdbMapper
      */
     public function mapToTitleData(array $data, MediaType $type): TitleData
     {
+        if (! isset($data['id']) || ! is_numeric($data['id']) || (int) $data['id'] < 1) {
+            throw new \UnexpectedValueException('TMDB title response has an invalid ID.');
+        }
+
         $title = $type === MediaType::Movie
             ? ($data['title'] ?? '')
             : ($data['name'] ?? '');
+        if (! is_string($title) || trim($title) === '') {
+            throw new \UnexpectedValueException('TMDB title response has no title.');
+        }
 
         $originalTitle = $type === MediaType::Movie
             ? ($data['original_title'] ?? null)
@@ -30,17 +37,23 @@ class TmdbMapper
             ? ($data['release_date'] ?? null)
             : ($data['first_air_date'] ?? null);
 
-        $releaseYear = $releaseDate ? (int) substr($releaseDate, 0, 4) : null;
+        $releaseYear = is_string($releaseDate) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $releaseDate) === 1
+            ? (int) substr($releaseDate, 0, 4)
+            : null;
 
         $directors = $this->extractDirectors($data, $type);
         $cast = $this->extractCast($data);
         $videos = $this->extractVideos($data);
 
         $rawGenres = $data['genre_ids'] ?? $data['genres'] ?? [];
-        $genreIds = array_map(
-            fn (mixed $item) => is_array($item) ? (int) $item['id'] : (int) $item,
-            $rawGenres
-        );
+        $genreIds = array_values(array_filter(array_map(
+            static function (mixed $item): ?int {
+                $id = is_array($item) ? ($item['id'] ?? null) : $item;
+
+                return is_numeric($id) && (int) $id > 0 ? (int) $id : null;
+            },
+            is_array($rawGenres) ? $rawGenres : [],
+        )));
 
         return new TitleData(
             tmdbId: (int) $data['id'],
@@ -138,6 +151,9 @@ class TmdbMapper
             return $priority($a) <=> $priority($b);
         });
 
-        return array_map(fn (array $video) => $video['key'], $youtubeVideos);
+        return array_values(array_filter(array_map(
+            static fn (array $video): ?string => isset($video['key']) && is_string($video['key']) ? $video['key'] : null,
+            $youtubeVideos,
+        )));
     }
 }

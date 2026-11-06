@@ -20,8 +20,25 @@ class TitleSearchTest extends TestCase
         Title::factory()->create(['title' => 'Matrix', 'adult' => false]);
         $response = $this->getJson('/search?q=Matrix');
         $response->assertOk();
-        $response->assertJsonCount(1);
-        $this->assertEquals('Matrix', $response->json()[0]['title']);
+        $response->assertJsonPath('data.0.title', 'Matrix')
+            ->assertJsonPath('data.0.slug', 'matrix');
+    }
+
+    /** @test */
+    public function substring_search_returns_popular_titles_across_title_words(): void
+    {
+        Title::factory()->create(['title' => 'Spider-Man', 'popularity' => 10, 'adult' => false]);
+        Title::factory()->create(['title' => 'A Special Story', 'popularity' => 50, 'adult' => false]);
+        Title::factory()->create(['title' => 'Hidden Spider', 'is_hidden' => true, 'adult' => false]);
+        Title::factory()->create(['title' => 'Adult Spider', 'adult' => true]);
+
+        $response = $this->getJson('/search?q=sp');
+
+        $response->assertOk()
+            ->assertJsonPath('data.data.0.title', 'A Special Story')
+            ->assertJsonFragment(['title' => 'Spider-Man'])
+            ->assertJsonMissing(['title' => 'Hidden Spider'])
+            ->assertJsonMissing(['title' => 'Adult Spider']);
     }
 
     /** @test */
