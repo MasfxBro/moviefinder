@@ -81,5 +81,9 @@ class AppServiceProvider extends ServiceProvider
 
             return $limits;
         });
+
+        RateLimiter::for('report-link', function ($request) {
+            return Limit::perDay(10)->by($request->user()?->id ?: $request->ip());
+        });
     }
 }

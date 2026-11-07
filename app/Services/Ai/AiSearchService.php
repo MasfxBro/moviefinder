@@ -130,7 +130,7 @@ class AiSearchService
                 $this->quota->commit($user, $reservation, ['mode' => 'title', 'model' => $route['model'], 'model_tier' => $route['tier'], 'input_tokens' => $inputTokens, 'output_tokens' => $outputTokens, 'cost_idr' => $cost]);
                 $this->budget->addCost($user, $plan, $windowStart, $windowEnd, $cost);
 
-                return ['reply' => $message, 'titles' => [], 'clips' => $clips, 'fallback_links' => $fallbackLinks, 'clip_notice' => $clipNotice, 'search_suggestions' => $searchSuggestions, 'conversation_id' => $conversation['conversation_id'], 'quota' => $this->accessState->for($user)];
+                return ['reply' => $message, 'titles' => [], 'clips' => $clips, 'fallback_links' => $fallbackLinks, 'clip_notice' => $clipNotice, 'search_suggestions' => $searchSuggestions, 'conversation_id' => $conversation['conversation_id'], 'quota' => $this->accessState->for($user), 'intent' => $reply->intent];
             }
 
             $verified = [];

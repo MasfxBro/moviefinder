@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\BrowseController;
+use App\Http\Controllers\ClipReportController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TitleDetailController;
@@ -28,6 +29,7 @@ require __DIR__.'/auth.php';
 Route::middleware('auth')->group(function () {
     Route::get('/browse', BrowseController::class)->name('browse');
     Route::get('/titles/{slug}', TitleDetailController::class)->name('titles.show');
+    Route::post('/clips/{clipLink}/report', [ClipReportController::class, 'store'])->middleware('throttle:report-link')->name('clips.report');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -410,13 +410,17 @@ export default function aiChat(options = {}) {
                     this.evaluateStatusLine();
                 }
 
+                const clips = payload.clips || [];
+                const isFindScene = payload.intent === 'find_scene';
                 this.messages.push({
                     role: 'assistant',
                     content: payload.reply || '',
                     titles: payload.titles || [],
-                    clips: payload.clips || [],
+                    clips: clips,
                     fallback_links: payload.fallback_links || [],
-                    showClipTeaser: payload.clips && payload.clips.length === 0 && this.quota.plan === 'free',
+                    showClipTeaser: clips.length === 0 && this.quota.plan === 'free',
+                    noClipFound: isFindScene && clips.length === 0,
+                    searchQuery: text,
                 });
 
                 this.$nextTick(() => {
