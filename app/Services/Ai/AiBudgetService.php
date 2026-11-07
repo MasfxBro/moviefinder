@@ -36,6 +36,26 @@ class AiBudgetService
         ];
     }
 
+    public function reserveClipSearch(User $user, Plan $plan, CarbonImmutable $windowStart, CarbonImmutable $windowEnd): bool
+    {
+        if ($plan === Plan::Free || $user->isAdmin()) {
+            return false;
+        }
+
+        return DB::transaction(function () use ($user, $windowStart, $windowEnd, $plan): bool {
+            DB::table('ai_budget')->insertOrIgnore([
+                'user_id' => $user->id, 'window_start' => $windowStart->toDateString(), 'window_end' => $windowEnd->toDateString(),
+                'spent_idr' => 0, 'clip_searches' => 0, 'created_at' => now(), 'updated_at' => now(),
+            ]);
+            $budget = max(1, (int) $this->plans->get($plan)['budget_idr_period']);
+            $query = DB::table('ai_budget')->where('user_id', $user->id)->where('window_start', $windowStart->toDateString())
+                ->where('clip_searches', '<', (int) $this->plans->get($plan)['ai_clip_searches_period'])
+                ->whereRaw('spent_idr < ? * ?', [$budget, (float) ($this->settings->get('ai.budget.clip_search_off_pct') ?? 80) / 100]);
+
+            return $query->increment('clip_searches') === 1;
+        }, attempts: 5);
+    }
+
     public function addCost(User $user, Plan $plan, CarbonImmutable $windowStart, CarbonImmutable $windowEnd, int $costIdr, bool $clipSearch = false): bool
     {
         if ($plan === Plan::Free || $user->isAdmin()) {

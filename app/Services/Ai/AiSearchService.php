@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Ai;
 
+use App\Contracts\ClipFinder;
 use App\Contracts\LlmClient;
 use App\Contracts\MetadataProvider;
 use App\Contracts\PlanResolver;
 use App\DTOs\CandidateData;
+use App\DTOs\SceneQuery;
 use App\Enums\MediaType;
 use App\Enums\Plan;
 use App\Exceptions\Tmdb\TmdbException;
@@ -38,7 +40,7 @@ class AiSearchService
         private readonly TitleImporter $importer,
         private readonly CandidateCritic $critic,
         private readonly AiCostCalculator $costs,
-        private readonly ClipFinder $clipFinder,
+        private readonly \App\Services\Ai\ClipFinder $clipFinder,
     ) {}
 
     /** @return array<string, mixed> */
@@ -108,8 +110,19 @@ class AiSearchService
             if ($mode === 'title') {
                 $clips = [];
                 $fallbackLinks = [];
+                $clipNotice = null;
+                $searchSuggestions = null;
                 if ($reply->intent === 'find_scene' && $titleContext !== null) {
-                    ['clips' => $clips, 'fallback_links' => $fallbackLinks] = $this->clipFinder->find($title, $reply->scene);
+                    $sceneQuery = new SceneQuery(sha1(json_encode($reply->scene, JSON_THROW_ON_ERROR)), $reply->scene['description'] ?? '', $reply->scene['keywords'] ?? []);
+                    if ($this->clipFinder instanceof ClipFinder) {
+                        $clipResults = $this->clipFinder->find($title, $sceneQuery, $plan, $user);
+                        $clips = $clipResults->clips;
+                        $fallbackLinks = array_values(array_filter($clips, fn (mixed $clip): bool => is_array($clip) && ($clip['verified'] ?? true) === false));
+                        $clipNotice = $clipResults->notice;
+                        $searchSuggestions = $clipResults->searchSuggestions;
+                    } else {
+                        ['clips' => $clips, 'fallback_links' => $fallbackLinks] = $this->clipFinder->find($title, $reply->scene);
+                    }
                 }
                 $message = $reply->reply;
                 $cost = $this->costs->calculate($inputTokens, $outputTokens, $route['tier']);
@@ -117,7 +130,7 @@ class AiSearchService
                 $this->quota->commit($user, $reservation, ['mode' => 'title', 'model' => $route['model'], 'model_tier' => $route['tier'], 'input_tokens' => $inputTokens, 'output_tokens' => $outputTokens, 'cost_idr' => $cost]);
                 $this->budget->addCost($user, $plan, $windowStart, $windowEnd, $cost);
 
-                return ['reply' => $message, 'titles' => [], 'clips' => $clips, 'fallback_links' => $fallbackLinks, 'conversation_id' => $conversation['conversation_id'], 'quota' => $this->accessState->for($user)];
+                return ['reply' => $message, 'titles' => [], 'clips' => $clips, 'fallback_links' => $fallbackLinks, 'clip_notice' => $clipNotice, 'search_suggestions' => $searchSuggestions, 'conversation_id' => $conversation['conversation_id'], 'quota' => $this->accessState->for($user)];
             }
 
             $verified = [];

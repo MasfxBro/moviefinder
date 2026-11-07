@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\ClipFinder;
+use App\Contracts\GroundedLlmClient;
 use App\Contracts\LlmClient;
 use App\Contracts\MetadataProvider;
 use App\Contracts\PlanResolver;
@@ -10,6 +12,11 @@ use App\Services\Ai\FakeLlmClient;
 use App\Services\Ai\FreePlanResolver;
 use App\Services\Ai\GeminiClient;
 use App\Services\Ai\PlanCatalog;
+use App\Services\Clips\AiSearchClipFinder;
+use App\Services\Clips\ClipFinderChain;
+use App\Services\Clips\CuratedClipFinder;
+use App\Services\Clips\SearchLinkFinder;
+use App\Services\Clips\StoredClipFinder;
 use App\Services\Tmdb\TmdbClient;
 use App\Services\Tmdb\TmdbMapper;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -32,6 +39,13 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(LlmClient::class, fn () => config('ai.driver') === 'fake' ? new FakeLlmClient : new GeminiClient);
+        $this->app->bind(GroundedLlmClient::class, GeminiClient::class);
+        $this->app->bind(ClipFinder::class, fn ($app) => new ClipFinderChain([
+            $app->make(CuratedClipFinder::class),
+            $app->make(StoredClipFinder::class),
+            $app->make(AiSearchClipFinder::class),
+            $app->make(SearchLinkFinder::class),
+        ]));
         $this->app->bind(PlanResolver::class, FreePlanResolver::class);
     }
 
