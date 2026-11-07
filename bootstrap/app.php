@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureUserNotSuspended;
+use App\Http\Middleware\EnsureVerifiedForAi;
 use App\Http\Middleware\SetRequestId;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup('web', [
             AuthenticateSession::class,
             EnsureUserNotSuspended::class,
+        ]);
+        $middleware->alias([
+            'ai.verified' => EnsureVerifiedForAi::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

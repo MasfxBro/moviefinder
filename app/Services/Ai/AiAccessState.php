@@ -32,7 +32,10 @@ class AiAccessState
         return [
             'plan' => $plan->value,
             'units_left' => max(0, (int) $limits['daily_units'] - $count),
+            'units_limit' => (int) $limits['daily_units'],
             'smart_left' => max(0, (int) $limits['smart_searches_daily'] - $smartCount),
+            'smart_limit' => (int) $limits['smart_searches_daily'],
+            'pro_limit' => (int) ($this->plans->get(Plan::Pro)['daily_units']),
             'place_held' => $placeHeld,
             'places_full' => $plan === Plan::Free && ! $placeHeld && $this->places->isFull($now),
             'next_wave_at' => $this->places->nextWave($now)?->toIso8601String(),

@@ -70,7 +70,7 @@
                 @endif
 
                 {{-- Trailer Slot (T-15) --}}
-                <section id="trailer" class="bg-card border border-border rounded-2xl p-5 sm:p-6" aria-labelledby="trailer-heading">
+                <section id="trailer" class="scroll-mt-20 bg-card border border-border rounded-2xl p-5 sm:p-6" aria-labelledby="trailer-heading">
                     <h2 id="trailer-heading" class="text-lg font-bold text-text mb-3">
                         Trailer
                     </h2>
@@ -84,7 +84,7 @@
                 </section>
 
                 {{-- Where to watch Slot (T-15) --}}
-                <section id="where-to-watch" class="bg-card border border-border rounded-2xl p-5 sm:p-6" aria-labelledby="watch-heading">
+                <section id="where-to-watch" class="scroll-mt-20 bg-card border border-border rounded-2xl p-5 sm:p-6" aria-labelledby="watch-heading">
                     <h2 id="watch-heading" class="text-lg font-bold text-text mb-3">
                         Where to watch
                     </h2>
@@ -96,24 +96,10 @@
 
             {{-- Right 1 Column: Title Chat Card (Reserved for F-08) & Report link --}}
             <div class="space-y-6">
-                {{-- Title Chat Card Slot --}}
-                <section id="title-chat-slot" class="bg-card border border-border rounded-2xl p-5 sm:p-6" aria-labelledby="chat-heading">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-5 h-5 rounded-md bg-accent-soft text-accent flex items-center justify-center font-bold text-xs">
-                            AI
-                        </div>
-                        <h2 id="chat-heading" class="text-lg font-bold text-text">
-                            Ask about this title
-                        </h2>
-                    </div>
-
-                    <p class="text-sm text-muted mb-4">
-                        What would you like to know about {{ $title->title }}?
-                    </p>
-
-                    <div class="rounded-xl bg-surface border border-border p-4 text-center text-xs text-faint">
-                        AI chat assistant slot
-                    </div>
+                {{-- Embedded title chat --}}
+                <section id="title-chat-slot" class="scroll-mt-20 min-w-0 overflow-hidden bg-card border border-border rounded-2xl" aria-labelledby="chat-heading">
+                    <h2 id="chat-heading" class="sr-only">Ask about this title</h2>
+                    <x-ai-chat variant="embedded" :title="$title->title" :title-id="$title->id" />
                 </section>
 
                 {{-- Report a problem link --}}

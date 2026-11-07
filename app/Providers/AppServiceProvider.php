@@ -5,9 +5,11 @@ namespace App\Providers;
 use App\Contracts\LlmClient;
 use App\Contracts\MetadataProvider;
 use App\Contracts\PlanResolver;
+use App\Enums\Plan;
 use App\Services\Ai\FakeLlmClient;
 use App\Services\Ai\FreePlanResolver;
 use App\Services\Ai\GeminiClient;
+use App\Services\Ai\PlanCatalog;
 use App\Services\Tmdb\TmdbClient;
 use App\Services\Tmdb\TmdbMapper;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -47,6 +49,13 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Rate limiter for email verification resend (SECURITY.md section 6)
+        RateLimiter::for('ai-messages', function ($request) {
+            $plan = $request->user() ? app(PlanResolver::class)->resolve($request->user()) : Plan::Free;
+            $limit = (int) (app(PlanCatalog::class)->get($plan)['ai_rate_limit_per_minute'] ?? 6);
+
+            return Limit::perMinute($limit)->by($request->user()?->id ?: $request->ip());
+        });
+
         RateLimiter::for('verify-resend', function ($request) {
             $limits = [];
 

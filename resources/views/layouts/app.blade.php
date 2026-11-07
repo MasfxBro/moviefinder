@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark scroll-smooth">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,9 +11,6 @@
     </head>
     <body class="font-sans bg-bg text-text antialiased min-h-screen flex flex-col selection:bg-accent selection:text-text">
         <x-offline-banner />
-        @if (config('ai.driver') === 'fake')
-            <x-ai-demo-banner class="mx-4 mt-3 sm:mx-6 lg:mx-8" />
-        @endif
         <x-navbar />
 
         @isset($header)

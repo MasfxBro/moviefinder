@@ -56,16 +56,7 @@
                 @if (isset($aiButton))
                     {{ $aiButton }}
                 @else
-                    <button
-                        type="button"
-                        class="relative inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-card text-text text-sm font-medium hover:bg-elevated transition-colors"
-                        aria-label="AI Chat"
-                    >
-                        <div class="relative w-4 h-4 border border-border flex items-center justify-center">
-                            <span class="text-[9px] leading-none font-bold">AI</span>
-                        </div>
-                        <span class="hidden lg:inline">AI Chat</span>
-                    </button>
+                    <x-ai-nav-button />
                 @endif
 
                 {{-- User Avatar / Menu Slot --}}
@@ -164,6 +155,9 @@
                     </form>
                 </aside>
             </div>
+        </template>
+        <template x-teleport="body">
+            <x-ai-chat-panel />
         </template>
     @endif
 </nav>

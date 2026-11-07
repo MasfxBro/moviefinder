@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
@@ -30,6 +31,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/ai/messages', [AiController::class, 'messages'])->middleware(['ai.verified', 'throttle:ai-messages'])->name('ai.messages');
+    Route::get('/ai/status', [AiController::class, 'status'])->middleware('ai.verified')->name('ai.status');
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
