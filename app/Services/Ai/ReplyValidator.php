@@ -69,11 +69,11 @@ class ReplyValidator
             }
 
             $candidates[] = new CandidateData(
-                mb_substr($candidate['title'], 0, 200),
+                $this->cleanText($candidate['title'], 200),
                 isset($candidate['year']) && is_numeric($candidate['year']) ? (int) $candidate['year'] : null,
                 in_array($candidate['media_type'] ?? '', ['movie', 'tv', 'unknown'], true) ? $candidate['media_type'] : 'unknown',
                 max(0, min(1, (float) $candidate['confidence'])),
-                mb_substr(is_string($candidate['reason'] ?? null) ? $candidate['reason'] : '', 0, 200),
+                $this->cleanText($candidate['reason'] ?? '', 200),
             );
         }
 
@@ -84,14 +84,22 @@ class ReplyValidator
         return new AiReply(
             $intent,
             in_array($reply['refusal_reason'] ?? null, ['off_topic', 'adult', 'piracy', 'unsafe'], true) ? $reply['refusal_reason'] : null,
-            mb_substr(is_string($reply['reply'] ?? null) ? $reply['reply'] : '', 0, (int) config($titleMode ? 'ai.title_reply_max' : 'ai.reply_max', $titleMode ? 600 : 300)),
-            isset($reply['clarifying_question']) && is_string($reply['clarifying_question']) ? mb_substr($reply['clarifying_question'], 0, 200) : null,
+            $this->cleanText($reply['reply'] ?? '', (int) config($titleMode ? 'ai.title_reply_max' : 'ai.reply_max', $titleMode ? 600 : 300)),
+            isset($reply['clarifying_question']) && is_string($reply['clarifying_question']) ? $this->cleanText($reply['clarifying_question'], 200) : null,
             $titleMode ? [] : $candidates,
             [
-                'description' => isset($scene['description']) && is_string($scene['description']) ? mb_substr($scene['description'], 0, 300) : null,
-                'keywords' => array_map(fn (string $keyword): string => mb_substr($keyword, 0, 50), array_slice($keywords, 0, 6)),
-                'approx_position' => isset($scene['approx_position']) && is_string($scene['approx_position']) ? mb_substr($scene['approx_position'], 0, 100) : null,
+                'description' => isset($scene['description']) && is_string($scene['description']) ? $this->cleanText($scene['description'], 300) : null,
+                'keywords' => array_map(fn (string $keyword): string => $this->cleanText($keyword, 50), array_slice($keywords, 0, 6)),
+                'approx_position' => isset($scene['approx_position']) && is_string($scene['approx_position']) ? $this->cleanText($scene['approx_position'], 100) : null,
             ],
         );
+    }
+
+    private function cleanText(mixed $value, int $limit): string
+    {
+        $text = is_string($value) ? strip_tags($value) : '';
+        $text = preg_replace('/https?:\/\/\S+|www\.\S+/i', '', $text) ?? $text;
+
+        return mb_substr($text, 0, $limit);
     }
 }
