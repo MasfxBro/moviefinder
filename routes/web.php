@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TitleDetailController;
 use App\Http\Controllers\TitleSearchController;
+use App\Http\Controllers\WatchlistController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes (D-35: guests allowed)
@@ -30,6 +31,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/browse', BrowseController::class)->name('browse');
     Route::get('/titles/{slug}', TitleDetailController::class)->name('titles.show');
     Route::post('/clips/{clipLink}/report', [ClipReportController::class, 'store'])->middleware('throttle:report-link')->name('clips.report');
+    Route::get('/watchlist', [WatchlistController::class, 'index'])->name('watchlist.index');
+    Route::post('/watchlist/{title}', [WatchlistController::class, 'toggle'])->middleware('throttle:30,1')->name('watchlist.toggle');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

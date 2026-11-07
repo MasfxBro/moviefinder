@@ -32,6 +32,8 @@
                         :url="url('/titles/'.$result->slug)"
                         :genres="$result->genres->pluck('name')->all()"
                         :mediaType="$result->media_type"
+                        :title-id="$result->id"
+                        :saved="in_array($result->id, $savedTitleIds, true)"
                     />
                 @endforeach
             </x-title-grid>

@@ -4,16 +4,11 @@
         <x-detail-hero :title="$title">
             <x-slot:watchlist>
                 <div id="watchlist-slot">
-                    <button
-                        type="button"
-                        class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 rounded-xl text-sm font-medium bg-accent text-text hover:opacity-90 transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
-                        aria-label="Add to watchlist"
-                    >
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add to watchlist
-                    </button>
+                    @if (auth()->user()?->hasVerifiedEmail())
+                        <x-watchlist-toggle :title-id="$title->id" :saved="$watchlistSaved" />
+                    @else
+                        <p class="text-sm text-muted">Verify your email to use the watchlist.</p>
+                    @endif
                 </div>
             </x-slot:watchlist>
         </x-detail-hero>
@@ -118,17 +113,11 @@
         </div>
 
         {{-- Mobile Sticky Action Bar --}}
-        <div class="sm:hidden fixed bottom-0 left-0 right-0 z-30 p-3 bg-bg/95 backdrop-blur border-t border-border shadow-lg">
+        <div class="sm:hidden fixed bottom-0 left-0 right-0 z-30 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] bg-bg/95 backdrop-blur border-t border-border shadow-lg">
             <div class="flex items-center gap-2">
-                <button
-                    type="button"
-                    class="flex-1 inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-xl text-sm font-semibold bg-accent text-text hover:opacity-90 transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
-                >
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Watchlist
-                </button>
+                @if (auth()->user()?->hasVerifiedEmail())
+                    <div class="flex-1"><x-watchlist-toggle :title-id="$title->id" :saved="$watchlistSaved" /></div>
+                @endif
 
                 @if (filled($title->trailer_youtube_key))
                     <a

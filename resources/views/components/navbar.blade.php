@@ -79,6 +79,11 @@
                             <x-dropdown-link :href="route('profile.edit')">
                                 Profile
                             </x-dropdown-link>
+                            @if (auth()->user()->hasVerifiedEmail())
+                                <x-dropdown-link :href="route('watchlist.index')">
+                                    Watchlist
+                                </x-dropdown-link>
+                            @endif
 
                             <form method="POST" action="{{ route('logout') }}" class="hidden lg:block">
                                 @csrf

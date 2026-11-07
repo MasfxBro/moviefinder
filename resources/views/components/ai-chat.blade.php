@@ -164,10 +164,10 @@
                                                 return 'Unverified';
                                             },
                                             get videoId() {
-                                                return clip.video_id || null;
+                                                return clip.video_id || '';
                                             },
                                             get thumbnailUrl() {
-                                                return this.videoId ? 'https://img.youtube.com/vi/' + this.videoId + '/hqdefault.jpg' : null;
+                                                return this.videoId ? 'https://img.youtube.com/vi/' + this.videoId + '/hqdefault.jpg' : '';
                                             },
                                             get clipLabel() {
                                                 return clip.label || clip.title || title || 'Clip';

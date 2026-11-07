@@ -5,6 +5,8 @@
     'url' => '#',
     'genres' => [],
     'mediaType' => null,
+    'titleId' => null,
+    'saved' => false,
     'aspect' => '2/3',
 ])
 
@@ -41,8 +43,12 @@
         </a>
 
         {{-- Quick Action Slot --}}
-        @if(isset($watchlist))
-            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200">
+        @if($titleId && auth()->user()?->hasVerifiedEmail())
+            <div class="absolute top-2 right-2 opacity-100 sm:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200">
+                <x-watchlist-toggle :title-id="$titleId" :saved="$saved" compact />
+            </div>
+        @elseif(isset($watchlist))
+            <div class="absolute top-2 right-2 opacity-100 sm:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200">
                 {{ $watchlist }}
             </div>
         @endif

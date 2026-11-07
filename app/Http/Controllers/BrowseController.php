@@ -17,8 +17,14 @@ class BrowseController extends Controller
         $filters = $request->validated();
         $genres = Genre::orderBy('name')->get();
 
+        $titles = $filter->paginate($filters);
+        $savedTitleIds = $request->user()->hasVerifiedEmail()
+            ? $request->user()->watchlist()->pluck('title_id')->all()
+            : [];
+
         return view('browse', [
-            'titles' => $filter->paginate($filters),
+            'titles' => $titles,
+            'savedTitleIds' => $savedTitleIds,
             'filters' => $filters,
             'genres' => $genres,
             'chips' => $this->chips($filters, $genres->pluck('name', 'id')->all()),

@@ -73,8 +73,12 @@ class TitleDetailController extends Controller
             }
         }
 
+        $saved = $request->user()->hasVerifiedEmail()
+            && $request->user()->watchlist()->where('title_id', $title->id)->exists();
+
         return view('titles.show', [
             'title' => $title,
+            'watchlistSaved' => $saved,
             'watchProviders' => $watchProviders,
         ]);
     }

@@ -27,7 +27,7 @@ class HomeController extends Controller
             return $this->landingView();
         }
 
-        return $this->homeView();
+        return $this->homeView($request);
     }
 
     private function landingView(): View
@@ -64,7 +64,7 @@ class HomeController extends Controller
         ]);
     }
 
-    private function homeView(): View
+    private function homeView(Request $request): View
     {
         // 1. Trending (cached daily from TMDB, plain arrays only)
         $trendingData = Cache::remember('v1:home:trending', 86400, function () {
@@ -170,7 +170,12 @@ class HomeController extends Controller
 
         $isEmpty = ! Title::where('is_hidden', false)->exists();
 
+        $savedTitleIds = $request->user()->hasVerifiedEmail()
+            ? $request->user()->watchlist()->pluck('title_id')->all()
+            : [];
+
         return view('home', [
+            'savedTitleIds' => $savedTitleIds,
             'isEmpty' => $isEmpty,
             'trending' => $trending,
             'popular' => $popular,

@@ -19,6 +19,8 @@
                                     :url="$item['url']"
                                     :genres="$item['genres']"
                                     :mediaType="$item['media_type']"
+                                    :title-id="$item['id']"
+                                    :saved="in_array($item['id'], $savedTitleIds, true)"
                                 >
                                     <x-slot:watchlist>
                                         <button
@@ -49,6 +51,8 @@
                                     :url="url('/titles/' . $title->slug)"
                                     :genres="$title->genres->pluck('name')->all()"
                                     :mediaType="$title->media_type"
+                                    :title-id="$title->id"
+                                    :saved="in_array($title->id, $savedTitleIds, true)"
                                 >
                                     <x-slot:watchlist>
                                         <button
@@ -79,6 +83,8 @@
                                     :url="url('/titles/' . $title->slug)"
                                     :genres="$title->genres->pluck('name')->all()"
                                     :mediaType="$title->media_type"
+                                    :title-id="$title->id"
+                                    :saved="in_array($title->id, $savedTitleIds, true)"
                                 >
                                     <x-slot:watchlist>
                                         <button
@@ -109,6 +115,8 @@
                                     :url="url('/titles/' . $title->slug)"
                                     :genres="$title->genres->pluck('name')->all()"
                                     :mediaType="$title->media_type"
+                                    :title-id="$title->id"
+                                    :saved="in_array($title->id, $savedTitleIds, true)"
                                 >
                                     <x-slot:watchlist>
                                         <button
@@ -139,6 +147,8 @@
                                     :url="url('/titles/' . $title->slug)"
                                     :genres="$title->genres->pluck('name')->all()"
                                     :mediaType="$title->media_type"
+                                    :title-id="$title->id"
+                                    :saved="in_array($title->id, $savedTitleIds, true)"
                                 >
                                     <x-slot:watchlist>
                                         <button

@@ -19,7 +19,7 @@ class TitleSearchController extends Controller
         if ($term === '') {
             return $request->expectsJson()
                 ? response()->json([])
-                : view('search', ['results' => collect()]);
+                : view('search', ['results' => collect(), 'savedTitleIds' => []]);
         }
         $escaped = addcslashes($term, '%_');
         $local = Title::query()
@@ -38,7 +38,11 @@ class TitleSearchController extends Controller
                 return TitleSearchResource::collection($local);
             }
 
-            return view('search', ['results' => $local]);
+            $savedTitleIds = $request->user()->hasVerifiedEmail()
+                ? $request->user()->watchlist()->pluck('title_id')->all()
+                : [];
+
+            return view('search', ['results' => $local, 'savedTitleIds' => $savedTitleIds]);
         }
         // record miss counter
         DB::table('search_misses')
@@ -71,6 +75,6 @@ class TitleSearchController extends Controller
             return response()->json($tmdbResults);
         }
 
-        return view('search', ['results' => collect()]);
+        return view('search', ['results' => collect(), 'savedTitleIds' => []]);
     }
 }
