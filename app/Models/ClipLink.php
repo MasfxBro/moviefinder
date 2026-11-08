@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property bool $is_embeddable
+ * @property string $source_label
+ */
 class ClipLink extends Model
 {
     use HasFactory;
@@ -16,11 +20,6 @@ class ClipLink extends Model
     protected $fillable = [
         'title_id', 'video_platform', 'video_id', 'url', 'channel_name', 'channel_id',
         'label', 'trust', 'source', 'scene_key', 'status', 'verified_at', 'created_by',
-    ];
-
-    protected $appends = [
-        'is_embeddable',
-        'source_label',
     ];
 
     protected function casts(): array
@@ -46,9 +45,14 @@ class ClipLink extends Model
             && in_array($this->trust, ['official', 'trusted'], true);
     }
 
+    public function getIsEmbeddableAttribute(): bool
+    {
+        return $this->isEmbeddable();
+    }
+
     public function sourceLabel(): string
     {
-        if ($this->video_platform === 'other' || $this->video_platform === 'external') {
+        if (! in_array($this->video_platform, ['youtube', 'vimeo', 'dailymotion', 'tiktok'], true)) {
             return 'External link';
         }
 
@@ -57,11 +61,6 @@ class ClipLink extends Model
             'trusted' => 'Trusted',
             default => 'Unverified',
         };
-    }
-
-    public function getIsEmbeddableAttribute(): bool
-    {
-        return $this->isEmbeddable();
     }
 
     public function getSourceLabelAttribute(): string

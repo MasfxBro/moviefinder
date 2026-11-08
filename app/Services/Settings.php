@@ -19,18 +19,18 @@ class Settings
      *
      * @param  string  $key  Dot-notation key (e.g. 'ai.cost.standard_input')
      */
-    public function get(string $key): mixed
+    public function get(string $key, mixed $default = null): mixed
     {
         $cacheKey = self::CACHE_KEY_PREFIX.$key;
 
-        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($key): mixed {
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($key, $default): mixed {
             $row = DB::table('settings')->where('key', $key)->first();
 
             if ($row !== null) {
                 return json_decode($row->value, true);
             }
 
-            return $this->getConfigDefault($key);
+            return $this->getConfigDefault($key) ?? $default;
         });
     }
 

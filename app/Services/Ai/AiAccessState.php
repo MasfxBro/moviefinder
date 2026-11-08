@@ -7,13 +7,12 @@ namespace App\Services\Ai;
 use App\Contracts\PlanResolver;
 use App\Enums\Plan;
 use App\Models\User;
-use App\Services\Settings;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 class AiAccessState
 {
-    public function __construct(private readonly PlanResolver $resolver, private readonly PlanCatalog $plans, private readonly FreePlaceService $places, private readonly AiBudgetService $budget, private readonly Settings $settings) {}
+    public function __construct(private readonly PlanResolver $resolver, private readonly PlanCatalog $plans, private readonly FreePlaceService $places, private readonly AiBudgetService $budget) {}
 
     /** @return array<string, mixed> */
     public function for(User $user, ?CarbonImmutable $periodStart = null, ?CarbonImmutable $periodEnd = null): array
@@ -41,7 +40,7 @@ class AiAccessState
             'next_wave_at' => $this->places->nextWave($now)?->toIso8601String(),
             'daily_limit_used' => $count >= (int) $limits['daily_units'],
             'daily_reset_at' => $now->addDay()->startOfDay()->toIso8601String(),
-            'allowance_used' => (int) ($budgetState['clip_searches_used'] ?? 0),
+            'allowance_used' => (int) ($budgetState['clip_searches_used']),
             'allowance_limit' => (int) $limits['ai_clip_searches_period'],
             'renews_at' => $budgetState['renews_at']?->toIso8601String(),
             'budget' => $budgetState,

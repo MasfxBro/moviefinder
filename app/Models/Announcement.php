@@ -76,7 +76,7 @@ class Announcement extends Model
     public static function currentActive(): Collection
     {
         return Cache::remember('announcements.active', 60, function (): Collection {
-            return static::query()
+            return self::query()
                 ->active()
                 ->orderBy('id', 'desc')
                 ->get();

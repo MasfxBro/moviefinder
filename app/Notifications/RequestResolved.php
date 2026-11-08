@@ -28,20 +28,20 @@ class RequestResolved extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $title = $this->titleRequest->title_text;
-        $status = $this->titleRequest->status;
+        $status = $this->titleRequest->getRawOriginal('status');
 
         $mail = (new MailMessage)
             ->subject("Your title request for \"{$title}\" has been resolved")
             ->greeting('Hello '.$notifiable->name.',');
 
-        if ($status === RequestStatus::Added) {
+        if ($status === RequestStatus::Added->value) {
             $mail->line("Great news! Your requested title \"{$title}\" has been added to our catalog.");
             if ($this->titleRequest->resolvedTitle) {
-                $mail->action('View Title', url('/titles/'.$this->titleRequest->resolvedTitle->slug));
+                $mail->action('View Title', url('/titles/'.$this->titleRequest->resolvedTitle->getAttribute('slug')));
             }
-        } elseif ($status === RequestStatus::Approved) {
+        } elseif ($status === RequestStatus::Approved->value) {
             $mail->line("Your request for \"{$title}\" has been approved and is being added to our catalog.");
-        } elseif ($status === RequestStatus::Rejected) {
+        } elseif ($status === RequestStatus::Rejected->value) {
             $mail->line("Your request for \"{$title}\" could not be fulfilled.");
             if ($this->titleRequest->admin_note) {
                 $mail->line("Note from reviewer: {$this->titleRequest->admin_note}");

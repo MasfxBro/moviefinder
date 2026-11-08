@@ -43,10 +43,10 @@ final readonly class PlatformUrl
             $id = null;
             if ($host === 'youtu.be') {
                 $id = trim($parts['path'] ?? '', '/');
-            } elseif (($parts['path'] ?? '') === '/watch') {
+            } elseif ($parts['path'] === '/watch') {
                 parse_str($parts['query'] ?? '', $query);
                 $id = is_string($query['v'] ?? null) ? $query['v'] : null;
-            } elseif (preg_match('~^/(?:embed|shorts)/([A-Za-z0-9_-]{11})$~', $parts['path'] ?? '', $match) === 1) {
+            } elseif (preg_match('~^/(?:embed|shorts)/([A-Za-z0-9_-]{11})$~', $parts['path'], $match) === 1) {
                 $id = $match[1];
             }
             if (! is_string($id) || preg_match('/^[A-Za-z0-9_-]{11}$/D', $id) !== 1) {
@@ -63,10 +63,10 @@ final readonly class PlatformUrl
             return new self($platform, 'https://www.dailymotion.com/video/'.$match[1], $match[1]);
         }
         if ($platform === 'tiktok' && preg_match('~^/@[A-Za-z0-9._-]{1,24}/video/[0-9]{1,30}/?$~', $parts['path'] ?? '') === 1) {
-            return new self($platform, 'https://www.tiktok.com'.($parts['path'] ?? ''), null);
+            return new self($platform, 'https://www.tiktok.com'.$parts['path'], null);
         }
         if ($platform === 'external' && preg_match('~^/[A-Za-z0-9._/@-]{1,180}/?$~', $parts['path'] ?? '') === 1 && ! isset($parts['query'])) {
-            return new self($platform, 'https://'.$host.($parts['path'] ?? ''), null);
+            return new self($platform, 'https://'.$host.$parts['path'], null);
         }
 
         return null;

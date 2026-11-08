@@ -139,7 +139,7 @@ class AiSearchClipFinder implements ClipFinder
             }
             $response = Http::withoutRedirecting()->connectTimeout(5)->timeout(5)->get($url);
             $location = $response->header('Location');
-            if (! $response->redirect() || ! is_string($location)) {
+            if (! $response->redirect() || $location === '') {
                 return null;
             }
             if (str_starts_with($location, '/')) {
