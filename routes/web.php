@@ -3,6 +3,8 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminLoginController;
+use App\Http\Controllers\Admin\AdminMissedSearchController;
+use App\Http\Controllers\Admin\AdminRequestController;
 use App\Http\Controllers\Admin\AdminTitleController;
 use App\Http\Controllers\Admin\AdminTwoFactorController;
 use App\Http\Controllers\AiController;
@@ -41,6 +43,18 @@ if ($adminPath !== '') {
             Route::post('/titles/{title}/refresh', [AdminTitleController::class, 'refresh'])->name('admin.titles.refresh');
             Route::get('/titles/{title}/delete', [AdminTitleController::class, 'confirmDelete'])->name('admin.titles.delete_confirm');
             Route::delete('/titles/{title}', [AdminTitleController::class, 'destroy'])->name('admin.titles.destroy');
+
+            // Admin Requests Queue
+            Route::get('/requests', [AdminRequestController::class, 'index'])->name('admin.requests.index');
+            Route::post('/requests/{titleRequest}/approve', [AdminRequestController::class, 'approve'])->name('admin.requests.approve');
+            Route::post('/requests/{titleRequest}/create-manual', [AdminRequestController::class, 'createManual'])->name('admin.requests.create_manual');
+            Route::post('/requests/{titleRequest}/reject', [AdminRequestController::class, 'reject'])->name('admin.requests.reject');
+            Route::post('/requests/merge', [AdminRequestController::class, 'merge'])->name('admin.requests.merge');
+
+            // Admin Missed Searches
+            Route::get('/missed-searches', [AdminMissedSearchController::class, 'index'])->name('admin.missed_searches.index');
+            Route::post('/missed-searches/{searchMiss}/convert', [AdminMissedSearchController::class, 'convert'])->name('admin.missed_searches.convert');
+            Route::post('/missed-searches/{searchMiss}/ignore', [AdminMissedSearchController::class, 'ignore'])->name('admin.missed_searches.ignore');
         });
     });
 }
