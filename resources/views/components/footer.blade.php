@@ -8,6 +8,7 @@
             <a href="{{ url('/privacy') }}" class="hover:text-text transition-colors">Privacy Policy</a>
             <a href="{{ url('/copyright') }}" class="hover:text-text transition-colors">Copyright</a>
             <a href="{{ url('/about') }}" class="hover:text-text transition-colors">About</a>
+            <a href="{{ route('feedback.create') }}" class="hover:text-text transition-colors">Feedback</a>
             <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener" class="hover:text-text transition-colors">YouTube Terms</a>
             <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" class="hover:text-text transition-colors">Google Privacy</a>
         </div>

@@ -1,4 +1,7 @@
 <x-guest-layout>
+    @if ($maintenance ?? false)
+        <x-under-maintenance feature="Registration" />
+    @else
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
@@ -69,4 +72,5 @@
             </x-primary-button>
         </div>
     </form>
+    @endif
 </x-guest-layout>

@@ -77,7 +77,7 @@ it('releases failed calls without logging cost', function (): void {
 });
 
 it('starts a new daily quota after midnight WIB', function (): void {
-    $this->travelTo(CarbonImmutable::parse(now('Asia/Jakarta')->toDateString().' 00:00:01', 'Asia/Jakarta'));
+    $this->travelTo(CarbonImmutable::parse('2026-11-06 00:00:01', 'Asia/Jakarta'));
     $user = User::factory()->create();
     DB::table('ai_usage')->insert(['user_id' => $user->id, 'used_on' => '2026-11-05', 'count' => 5, 'smart_count' => 0, 'created_at' => now(), 'updated_at' => now()]);
     DB::table('ai_free_pool')->insert(['used_on' => '2026-11-06', 'taken' => 0]);

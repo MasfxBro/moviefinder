@@ -8,6 +8,7 @@ use App\Http\Requests\AiMessageRequest;
 use App\Http\Resources\AiMessageResource;
 use App\Services\Ai\AiAccessState;
 use App\Services\Ai\AiSearchService;
+use App\Services\Settings;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use RuntimeException;
@@ -16,6 +17,16 @@ class AiController extends Controller
 {
     public function messages(AiMessageRequest $request, AiSearchService $search): AiMessageResource|JsonResponse
     {
+        if (! app(Settings::class)->get('features.ai_enabled', true)) {
+            return response()->json([
+                'reply' => 'AI search is under maintenance. Normal search still works. Please try again later.',
+                'titles' => [],
+                'clips' => [],
+                'fallback_links' => [],
+                'quota' => app(AiAccessState::class)->for($request->user()),
+            ], 200);
+        }
+
         try {
             return new AiMessageResource($search->search(
                 $request->user(),

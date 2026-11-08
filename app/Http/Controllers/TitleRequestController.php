@@ -9,6 +9,7 @@ use App\Enums\RequestStatus;
 use App\Http\Requests\StoreTitleRequest;
 use App\Models\TitleRequest;
 use App\Services\Ai\PlanCatalog;
+use App\Services\Settings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -46,11 +47,24 @@ class TitleRequestController extends Controller
         Gate::authorize('create', TitleRequest::class);
 
         $user = $request->user();
+        $plan = $planResolver->resolve($user);
+
+        if (! app(Settings::class)->get('features.requests_open', true)) {
+            return view('requests.create', [
+                'maintenance' => true,
+                'plan' => $plan,
+                'usedToday' => 0,
+                'dailyLimit' => 0,
+                'remainingToday' => 0,
+                'prefilledTitle' => '',
+                'prefilledYear' => '',
+                'prefilledType' => 'movie',
+            ]);
+        }
+
         $prefilledTitle = (string) $request->query('title', $request->query('q', ''));
         $prefilledYear = (string) $request->query('year', $request->query('release_year', ''));
         $prefilledType = (string) $request->query('type', $request->query('media_type', 'movie'));
-
-        $plan = $planResolver->resolve($user);
         $dailyLimit = (int) ($planCatalog->get($plan)['requests_daily'] ?? 2);
         $usedToday = $user->titleRequests()
             ->where('created_at', '>=', now()->startOfDay())
@@ -71,6 +85,14 @@ class TitleRequestController extends Controller
     public function store(StoreTitleRequest $request): RedirectResponse|JsonResponse
     {
         Gate::authorize('create', TitleRequest::class);
+
+        if (! app(Settings::class)->get('features.requests_open', true)) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Title requests are under maintenance.'], 503);
+            }
+
+            return redirect()->route('requests.create');
+        }
 
         $user = $request->user();
         $titleText = trim((string) ($request->input('title_text') ?? $request->input('title')));

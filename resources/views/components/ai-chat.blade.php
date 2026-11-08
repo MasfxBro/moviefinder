@@ -10,6 +10,11 @@
     @endif
     class="flex flex-col flex-1 {{ $variant === 'embedded' ? 'h-[32rem] max-h-[70vh]' : 'h-full' }} min-h-0 bg-card text-text overflow-hidden"
 >
+    @if (! app(\App\Services\Settings::class)->get('features.ai_enabled', true))
+        <div class="p-6">
+            <x-under-maintenance feature="AI search" />
+        </div>
+    @else
     {{-- Demo driver banner while AI_DRIVER=fake --}}
     @if (config('ai.driver') === 'fake')
         <div class="px-4 pt-3 pb-1">
@@ -501,4 +506,5 @@
             </svg>
         </button>
     </form>
+    @endif
 </div>

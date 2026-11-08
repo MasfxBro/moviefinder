@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\ClipReportController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchHistoryController;
@@ -60,6 +61,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/requests/create', [TitleRequestController::class, 'create'])->name('requests.create');
     Route::post('/requests', [TitleRequestController::class, 'store'])->middleware('throttle:request-title')->name('requests.store');
     Route::get('/requests/{titleRequest}', [TitleRequestController::class, 'show'])->name('requests.show');
+
+    Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
+    Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

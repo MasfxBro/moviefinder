@@ -3,13 +3,16 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-text">Request a title</h1>
-                <p class="text-sm text-muted mt-1">Can't find a movie or TV show? Request it and our team will look into adding it.</p>
+                <p class="text-sm text-muted mt-1">Cannot find a movie or TV show? Request it and our team will look into adding it.</p>
             </div>
             <a href="{{ route('requests.index') }}" class="text-sm text-accent hover:underline">
                 My requests
             </a>
         </div>
 
+        @if ($maintenance ?? false)
+            <x-under-maintenance feature="Title requests" />
+        @else
         <div class="p-4 rounded-xl bg-card border border-border flex items-center justify-between text-sm">
             <span class="text-muted">Daily limit ({{ ucfirst($plan->value) }} plan):</span>
             <span class="font-medium text-text">
@@ -108,5 +111,6 @@
                 </x-button>
             </div>
         </form>
+        @endif
     </div>
 </x-app-layout>

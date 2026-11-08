@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\User;
+use App\Services\Settings;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,9 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        abort_unless((bool) config('features.registration_open', true), 404);
+        if (! app(Settings::class)->get('features.registration_open', true)) {
+            return view('auth.register', ['maintenance' => true]);
+        }
 
         return view('auth.register');
     }
