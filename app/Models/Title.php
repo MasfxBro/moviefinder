@@ -56,6 +56,7 @@ class Title extends Model
             'locked_fields' => 'array',
             'vote_average' => 'decimal:1',
             'popularity' => 'float',
+            'release_year' => 'integer',
         ];
     }
 
@@ -108,10 +109,11 @@ class Title extends Model
         return $imageBase.'w500'.$this->poster_path;
     }
 
-    public static function generateUniqueSlug(string $title, ?int $year = null): string
+    public static function generateUniqueSlug(string $title, int|string|null $year = null): string
     {
         $base = Str::slug($title);
-        $suffix = $year ? "-{$year}" : '';
+        $numericYear = is_numeric($year) ? (int) $year : null;
+        $suffix = $numericYear ? "-{$numericYear}" : '';
         $slug = $base.$suffix;
 
         $count = 1;
