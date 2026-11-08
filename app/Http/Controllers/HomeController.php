@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\MetadataProvider;
+use App\Contracts\PlanResolver;
 use App\Enums\MediaType;
 use App\Models\Genre;
 use App\Models\Title;
+use App\Services\OnboardingService;
 use App\Services\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -19,6 +21,8 @@ class HomeController extends Controller
     public function __construct(
         private readonly Settings $settings,
         private readonly MetadataProvider $metadataProvider,
+        private readonly OnboardingService $onboardingService,
+        private readonly PlanResolver $planResolver,
     ) {}
 
     public function __invoke(Request $request): View
@@ -174,6 +178,23 @@ class HomeController extends Controller
             ? $request->user()->watchlist()->pluck('title_id')->all()
             : [];
 
+        $user = $request->user();
+        $showTourPrompt = false;
+        $startTour = false;
+        $tourSteps = [];
+
+        if ($user && ! $user->isAdmin() && $user->hasVerifiedEmail()) {
+            $plan = $this->planResolver->resolve($user);
+            $tourSteps = $this->onboardingService->getSteps($plan);
+
+            if ($request->has('tour')) {
+                $startTour = true;
+            } elseif ($this->onboardingService->shouldOffer($user)) {
+                $showTourPrompt = true;
+                $this->onboardingService->markSeen($user);
+            }
+        }
+
         return view('home', [
             'savedTitleIds' => $savedTitleIds,
             'isEmpty' => $isEmpty,
@@ -182,6 +203,9 @@ class HomeController extends Controller
             'topRated' => $topRated,
             'movies' => $movies,
             'tvShows' => $tvShows,
+            'showTourPrompt' => $showTourPrompt,
+            'startTour' => $startTour,
+            'tourSteps' => $tourSteps,
         ]);
     }
 

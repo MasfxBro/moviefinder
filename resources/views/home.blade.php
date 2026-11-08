@@ -21,6 +21,7 @@
                                     :mediaType="$item['media_type']"
                                     :title-id="$item['id']"
                                     :saved="in_array($item['id'], $savedTitleIds, true)"
+                                    :data-tour="$loop->first ? 'poster-card' : null"
                                 >
                                     <x-slot:watchlist>
                                         <button
@@ -53,6 +54,7 @@
                                     :mediaType="$title->media_type"
                                     :title-id="$title->id"
                                     :saved="in_array($title->id, $savedTitleIds, true)"
+                                    :data-tour="(empty($trending) && $loop->first) ? 'poster-card' : null"
                                 >
                                     <x-slot:watchlist>
                                         <button
@@ -166,6 +168,15 @@
                         @endforeach
                     </x-title-row>
                 @endif
+            @endif
+
+            @if($showTourPrompt ?? false)
+                <x-tour-prompt />
+            @endif
+
+            @if(!empty($tourSteps))
+                <script id="guided-tour-steps" type="application/json">@json($tourSteps)</script>
+                <x-tour-step :start-immediately="$startTour ?? false" />
             @endif
         </div>
     </div>

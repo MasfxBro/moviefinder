@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OnboardingOutcome;
 use App\Enums\Plan;
 use App\Enums\Role;
 use App\Notifications\ResetPassword;
@@ -18,7 +19,7 @@ use Illuminate\Notifications\Notifiable;
 /**
  * @property Role $role
  */
-#[Fillable(['name', 'email', 'password', 'role', 'age_confirmed_at'])]
+#[Fillable(['name', 'email', 'password', 'role', 'age_confirmed_at', 'onboarding_seen_at', 'onboarding_outcome'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -36,6 +37,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'age_confirmed_at' => 'datetime',
             'suspended_at' => 'datetime',
+            'onboarding_seen_at' => 'datetime',
+            'onboarding_outcome' => OnboardingOutcome::class,
             'password' => 'hashed',
             'role' => Role::class,
         ];

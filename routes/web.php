@@ -6,6 +6,7 @@ use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\ClipReportController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchHistoryController;
 use App\Http\Controllers\TitleDetailController;
@@ -31,6 +32,7 @@ require __DIR__.'/auth.php';
 
 // Protected routes (auth required, guests redirected to login)
 Route::middleware('auth')->group(function () {
+    Route::post('/onboarding/outcome', [OnboardingController::class, 'outcome'])->name('onboarding.outcome');
     Route::get('/browse', BrowseController::class)->name('browse');
     Route::get('/titles/{slug}', TitleDetailController::class)->name('titles.show');
     Route::post('/clips/{clipLink}/report', [ClipReportController::class, 'store'])->middleware('throttle:report-link')->name('clips.report');

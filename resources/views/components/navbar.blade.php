@@ -2,7 +2,7 @@
     'guest' => false,
 ])
 
-<nav x-data="{ mobileOpen: false, mobileSearchOpen: false }" x-on:keydown.escape.window="mobileOpen = false; mobileSearchOpen = false" class="sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-border">
+<nav data-tour="navbar" x-data="{ mobileOpen: false, mobileSearchOpen: false }" x-on:keydown.escape.window="mobileOpen = false; mobileSearchOpen = false" class="sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-border">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {{-- Brand / Logo --}}
         <div class="flex items-center gap-3">
@@ -19,7 +19,7 @@
             </a>
 
             {{-- Main Navigation Links --}}
-            <div class="hidden lg:flex items-center gap-6">
+            <div data-tour="nav-links" class="hidden lg:flex items-center gap-6">
                 <a href="{{ url('/') }}" class="text-sm font-medium text-text hover:text-accent transition-colors">
                     Home
                 </a>
@@ -34,11 +34,11 @@
 
         {{-- Center: Search slot --}}
         @if (isset($search))
-            <div class="flex-1 max-w-md hidden lg:block">
+            <div data-tour="search" class="flex-1 max-w-md hidden lg:block">
                 {{ $search }}
             </div>
         @elseif (! $guest && auth()->check())
-            <div class="flex-1 max-w-md hidden lg:block">
+            <div data-tour="search" class="flex-1 max-w-md hidden lg:block">
                 <x-search-bar />
             </div>
         @endif
@@ -53,54 +53,58 @@
                     </svg>
                 </button>
                 {{-- AI Chat Button Slot or default component --}}
-                @if (isset($aiButton))
-                    {{ $aiButton }}
-                @else
-                    <x-ai-nav-button />
-                @endif
+                <div data-tour="ai-button" class="inline-flex">
+                    @if (isset($aiButton))
+                        {{ $aiButton }}
+                    @else
+                        <x-ai-nav-button />
+                    @endif
+                </div>
 
                 {{-- User Avatar / Menu Slot --}}
-                @if (isset($avatar))
-                    {{ $avatar }}
-                @else
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            <button type="button" class="w-9 h-9 rounded-full bg-elevated border border-border flex items-center justify-center text-text text-sm font-semibold hover:border-accent transition-colors focus:outline-none" aria-label="Open user menu">
-                                {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
-                            </button>
-                        </x-slot>
+                <div data-tour="avatar-menu" class="inline-flex">
+                    @if (isset($avatar))
+                        {{ $avatar }}
+                    @else
+                        <x-dropdown align="right" width="48">
+                            <x-slot name="trigger">
+                                <button type="button" class="w-9 h-9 rounded-full bg-elevated border border-border flex items-center justify-center text-text text-sm font-semibold hover:border-accent transition-colors focus:outline-none" aria-label="Open user menu">
+                                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                                </button>
+                            </x-slot>
 
-                        <x-slot name="content">
-                            <div class="px-4 py-2 border-b border-border">
-                                <p class="text-sm font-medium text-text truncate">{{ auth()->user()->name }}</p>
-                                <p class="text-xs text-muted truncate">{{ auth()->user()->email }}</p>
-                            </div>
+                            <x-slot name="content">
+                                <div class="px-4 py-2 border-b border-border">
+                                    <p class="text-sm font-medium text-text truncate">{{ auth()->user()->name }}</p>
+                                    <p class="text-xs text-muted truncate">{{ auth()->user()->email }}</p>
+                                </div>
 
-                            <x-dropdown-link :href="route('profile.edit')">
-                                Profile
-                            </x-dropdown-link>
-                            @if (auth()->user()->hasVerifiedEmail())
-                                <x-dropdown-link :href="route('watchlist.index')">
-                                    Watchlist
+                                <x-dropdown-link :href="route('profile.edit')">
+                                    Profile
                                 </x-dropdown-link>
-                            @endif
-                            <x-dropdown-link :href="route('history.index')">
-                                Search history
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('requests.index')">
-                                My requests
-                            </x-dropdown-link>
-
-                            <form method="POST" action="{{ route('logout') }}" class="hidden lg:block">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault(); this.closest('form').submit();">
-                                    Log out
+                                @if (auth()->user()->hasVerifiedEmail())
+                                    <x-dropdown-link :href="route('watchlist.index')">
+                                        Watchlist
+                                    </x-dropdown-link>
+                                @endif
+                                <x-dropdown-link :href="route('history.index')">
+                                    Search history
                                 </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
-                @endif
+                                <x-dropdown-link :href="route('requests.index')">
+                                    My requests
+                                </x-dropdown-link>
+
+                                <form method="POST" action="{{ route('logout') }}" class="hidden lg:block">
+                                    @csrf
+                                    <x-dropdown-link :href="route('logout')"
+                                        onclick="event.preventDefault(); this.closest('form').submit();">
+                                        Log out
+                                    </x-dropdown-link>
+                                </form>
+                            </x-slot>
+                        </x-dropdown>
+                    @endif
+                </div>
             @else
                 <div class="flex items-center gap-3">
                     @if (Route::has('login'))

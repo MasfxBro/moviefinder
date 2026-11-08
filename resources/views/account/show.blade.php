@@ -46,6 +46,13 @@
                     <x-button variant="secondary" type="button" disabled>Cancel</x-button>
                     <span class="self-center text-sm text-muted">Available when billing launches.</span>
                 </div>
+                @if (! $user->isAdmin())
+                    <div class="pt-3 border-t border-border">
+                        <a href="{{ route('home', ['tour' => 1]) }}" class="text-sm font-medium text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent rounded">
+                            Take the tour again
+                        </a>
+                    </div>
+                @endif
             </section>
 
             <section class="space-y-4 rounded-2xl border border-border bg-card p-6">
