@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureUserNotSuspended;
 use App\Http\Middleware\EnsureVerifiedForAi;
+use App\Http\Middleware\HideAdminFromPublic;
 use App\Http\Middleware\SetRequestId;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'ai.verified' => EnsureVerifiedForAi::class,
+            'hide-admin' => HideAdminFromPublic::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

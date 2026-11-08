@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AdminLoginController;
+use App\Http\Controllers\Admin\AdminTwoFactorController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\ClipReportController;
@@ -15,6 +17,19 @@ use App\Http\Controllers\TitleSearchController;
 use App\Http\Controllers\VersionController;
 use App\Http\Controllers\WatchlistController;
 use Illuminate\Support\Facades\Route;
+
+$adminPath = trim((string) config('admin.path'), '/');
+if ($adminPath !== '') {
+    Route::prefix($adminPath)->group(function () {
+        Route::get('/login', [AdminLoginController::class, 'create'])->middleware('throttle:5,1')->name('admin.login');
+        Route::post('/login', [AdminLoginController::class, 'store'])->middleware('throttle:5,1')->name('admin.login.store');
+        Route::get('/two-factor', AdminTwoFactorController::class)->middleware('hide-admin')->name('admin.2fa');
+        Route::post('/two-factor', [AdminLoginController::class, 'verify'])->middleware(['hide-admin', 'throttle:5,1'])->name('admin.2fa.verify');
+        Route::middleware('hide-admin')->group(function () {
+            Route::view('/', 'admin.dashboard')->name('admin.dashboard');
+        });
+    });
+}
 
 // Public routes (D-35: guests allowed)
 Route::get('/', HomeController::class)->name('home');
