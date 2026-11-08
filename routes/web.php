@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\ClipReportController;
@@ -38,6 +39,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/history', [SearchHistoryController::class, 'index'])->name('history.index');
     Route::delete('/history', [SearchHistoryController::class, 'destroy'])->name('history.destroy');
     Route::get('/history/recent', [SearchHistoryController::class, 'recent'])->name('history.recent');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+    Route::patch('/account/name', [AccountController::class, 'updateName'])->name('account.name.update');
+    Route::delete('/account', [AccountController::class, 'destroy'])->name('account.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
