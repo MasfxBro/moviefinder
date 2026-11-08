@@ -72,6 +72,14 @@ class AiSearchService
         $conversation = $this->conversations->load($user, $conversationId);
         $smart = $plan === Plan::Pro && $budget['smart'];
         $reservation = $this->quota->reserve($user, smart: $smart);
+
+        if (empty($conversation['history'])) {
+            $user->searchHistory()->create([
+                'type' => 'ai',
+                'query' => mb_substr($text, 0, 200),
+            ]);
+        }
+
         $cached = $mode === 'global' && $plan === Plan::Free ? $this->answers->get($text) : null;
         if ($cached !== null) {
             $this->quota->commit($user, $reservation, ['mode' => 'global', 'model_tier' => 'standard', 'cost_idr' => 0]);

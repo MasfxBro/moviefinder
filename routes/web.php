@@ -5,6 +5,7 @@ use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\ClipReportController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchHistoryController;
 use App\Http\Controllers\TitleDetailController;
 use App\Http\Controllers\TitleSearchController;
 use App\Http\Controllers\WatchlistController;
@@ -33,6 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/clips/{clipLink}/report', [ClipReportController::class, 'store'])->middleware('throttle:report-link')->name('clips.report');
     Route::get('/watchlist', [WatchlistController::class, 'index'])->name('watchlist.index');
     Route::post('/watchlist/{title}', [WatchlistController::class, 'toggle'])->middleware('throttle:30,1')->name('watchlist.toggle');
+    Route::get('/history', [SearchHistoryController::class, 'index'])->name('history.index');
+    Route::delete('/history', [SearchHistoryController::class, 'destroy'])->name('history.destroy');
+    Route::get('/history/recent', [SearchHistoryController::class, 'recent'])->name('history.recent');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -8,7 +8,9 @@ use App\Contracts\LlmClient;
 use App\Contracts\MetadataProvider;
 use App\Contracts\PlanResolver;
 use App\Enums\Plan;
+use App\Models\SearchHistory;
 use App\Models\Watchlist;
+use App\Policies\SearchHistoryPolicy;
 use App\Policies\WatchlistPolicy;
 use App\Services\Ai\FakeLlmClient;
 use App\Services\Ai\FreePlanResolver;
@@ -58,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Watchlist::class, WatchlistPolicy::class);
+        Gate::policy(SearchHistory::class, SearchHistoryPolicy::class);
 
         Password::defaults(function () {
             return Password::min(10)

@@ -84,6 +84,9 @@
                                     Watchlist
                                 </x-dropdown-link>
                             @endif
+                            <x-dropdown-link :href="route('history.index')">
+                                Search history
+                            </x-dropdown-link>
 
                             <form method="POST" action="{{ route('logout') }}" class="hidden lg:block">
                                 @csrf
@@ -153,6 +156,7 @@
                         <a href="{{ url('/') }}" class="min-h-[44px] flex items-center text-sm font-medium text-text hover:text-accent">Home</a>
                         <a href="{{ url('/browse?type=movie') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">Movies</a>
                         <a href="{{ url('/browse?type=tv') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">TV Shows</a>
+                        <a href="{{ route('history.index') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">Search history</a>
                     </nav>
                     <form method="POST" action="{{ route('logout') }}" class="mt-auto">
                         @csrf

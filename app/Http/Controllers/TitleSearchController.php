@@ -21,6 +21,14 @@ class TitleSearchController extends Controller
                 ? response()->json([])
                 : view('search', ['results' => collect(), 'savedTitleIds' => []]);
         }
+
+        if (($user = $request->user()) && ! $request->boolean('live')) {
+            $user->searchHistory()->create([
+                'type' => 'normal',
+                'query' => mb_substr($term, 0, 200),
+            ]);
+        }
+
         $escaped = addcslashes($term, '%_');
         $local = Title::query()
             ->where('adult', false)
