@@ -4,6 +4,7 @@ import liveSearch from './liveSearch.js';
 import aiChat from './aiChat.js';
 import previewPlayer from './previewPlayer.js';
 import watchlistToggle from './watchlist.js';
+import updateNotice from './updateNotice.js';
 
 window.Alpine = Alpine;
 
@@ -12,5 +13,6 @@ Alpine.data('liveSearch', liveSearch);
 Alpine.data('aiChat', aiChat);
 Alpine.data('previewPlayer', previewPlayer);
 Alpine.data('watchlistToggle', watchlistToggle);
+Alpine.data('updateNotice', updateNotice);
 
 Alpine.start();

@@ -11,6 +11,7 @@ use App\Http\Controllers\SearchHistoryController;
 use App\Http\Controllers\TitleDetailController;
 use App\Http\Controllers\TitleRequestController;
 use App\Http\Controllers\TitleSearchController;
+use App\Http\Controllers\VersionController;
 use App\Http\Controllers\WatchlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,9 +24,7 @@ Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/copyright', 'legal.copyright')->name('copyright');
 Route::view('/about', 'legal.about')->name('about');
 
-Route::get('/version', function () {
-    return response()->json(['build' => config('app.build_id', 'dev')]);
-})->middleware('throttle:30,1')->name('version');
+Route::get('/version', VersionController::class)->middleware('throttle:30,1')->name('version');
 
 // Auth routes (register, login, etc.) loaded from auth.php
 require __DIR__.'/auth.php';

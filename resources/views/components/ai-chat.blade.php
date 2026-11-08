@@ -506,5 +506,55 @@
             </svg>
         </button>
     </form>
+
+    @if ($variant === 'embedded')
+    {{-- Exit Warning Modal (shown only when hasMessages is true) --}}
+    <div
+        x-cloak
+        x-show="exitModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg/80 backdrop-blur-sm"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="embedded-exit-modal-title"
+        aria-describedby="embedded-exit-modal-description"
+    >
+        <div
+            x-show="exitModalOpen"
+            x-transition:enter="ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="w-full max-w-sm rounded-2xl border border-border bg-elevated p-6 shadow-2xl flex flex-col gap-4"
+        >
+            <div class="flex flex-col gap-1">
+                <h4 id="embedded-exit-modal-title" class="text-base font-semibold text-text">
+                    {{ __('Leave this chat?') }}
+                </h4>
+                <p id="embedded-exit-modal-description" class="text-sm text-muted leading-relaxed">
+                    {{ __('Your conversation with the AI will be lost.') }}
+                </p>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button
+                    type="button"
+                    x-on:click="cancelLeave()"
+                    class="px-4 py-2 rounded-xl border border-border bg-card text-sm font-medium text-text hover:bg-surface focus:outline-none focus:ring-2 focus:ring-accent min-h-[44px]"
+                >
+                    {{ __('Stay') }}
+                </button>
+                <button
+                    type="button"
+                    x-on:click="confirmLeave()"
+                    class="px-4 py-2 rounded-xl bg-accent text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent min-h-[44px]"
+                >
+                    {{ __('Leave') }}
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
     @endif
 </div>

@@ -39,6 +39,7 @@ export default function aiChat(options = {}) {
         pendingAction: null,
         _linkClickHandler: null,
         _beforeUnloadHandler: null,
+        _exitConfirmHandler: null,
 
         suggestedPrompts: [
             'Action movie with a bus jump in the 1990s',
@@ -65,6 +66,18 @@ export default function aiChat(options = {}) {
                 }
             };
             window.addEventListener('beforeunload', this._beforeUnloadHandler);
+
+            this._exitConfirmHandler = (e) => {
+                if (this.hasMessages) {
+                    this.pendingAction = e.detail?.action || (() => window.location.reload());
+                    this.exitModalOpen = true;
+                    this.isOpen = true;
+                    if (typeof e.detail?.onIntercept === 'function') {
+                        e.detail.onIntercept();
+                    }
+                }
+            };
+            window.addEventListener('ai-chat:confirm-exit', this._exitConfirmHandler);
         },
 
         destroy() {
@@ -73,6 +86,9 @@ export default function aiChat(options = {}) {
             }
             if (this._beforeUnloadHandler) {
                 window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+            }
+            if (this._exitConfirmHandler) {
+                window.removeEventListener('ai-chat:confirm-exit', this._exitConfirmHandler);
             }
             this.clearTimers();
         },
