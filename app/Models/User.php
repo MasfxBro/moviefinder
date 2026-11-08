@@ -51,6 +51,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(SearchHistory::class);
     }
 
+    public function titleRequests(): HasMany
+    {
+        return $this->hasMany(TitleRequest::class);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === Role::Admin;

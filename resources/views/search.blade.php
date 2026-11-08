@@ -17,9 +17,11 @@
                 description="Try another title, or request it and we will look it up."
             >
                 <x-slot:action>
-                    <x-button variant="primary" onclick="alert('Request feature coming soon')">
-                        Request this title
-                    </x-button>
+                    <a href="{{ route('requests.create', ['title' => request('q')]) }}">
+                        <x-button variant="primary" onclick="window.location.href='{{ route('requests.create', ['title' => request('q')]) }}'">
+                            Request this title
+                        </x-button>
+                    </a>
                 </x-slot:action>
             </x-empty-state>
         @elseif (isset($results) && $results->isNotEmpty())

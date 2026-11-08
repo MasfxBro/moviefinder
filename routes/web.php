@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchHistoryController;
 use App\Http\Controllers\TitleDetailController;
+use App\Http\Controllers\TitleRequestController;
 use App\Http\Controllers\TitleSearchController;
 use App\Http\Controllers\WatchlistController;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::get('/search', [TitleSearchController::class, '__invoke'])->name('search');
+
+    Route::get('/requests', [TitleRequestController::class, 'index'])->name('requests.index');
+    Route::get('/requests/create', [TitleRequestController::class, 'create'])->name('requests.create');
+    Route::post('/requests', [TitleRequestController::class, 'store'])->middleware('throttle:request-title')->name('requests.store');
+    Route::get('/requests/{titleRequest}', [TitleRequestController::class, 'show'])->name('requests.show');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

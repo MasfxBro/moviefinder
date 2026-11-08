@@ -87,6 +87,9 @@
                             <x-dropdown-link :href="route('history.index')">
                                 Search history
                             </x-dropdown-link>
+                            <x-dropdown-link :href="route('requests.index')">
+                                My requests
+                            </x-dropdown-link>
 
                             <form method="POST" action="{{ route('logout') }}" class="hidden lg:block">
                                 @csrf
@@ -157,6 +160,7 @@
                         <a href="{{ url('/browse?type=movie') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">Movies</a>
                         <a href="{{ url('/browse?type=tv') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">TV Shows</a>
                         <a href="{{ route('history.index') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">Search history</a>
+                        <a href="{{ route('requests.index') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">My requests</a>
                     </nav>
                     <form method="POST" action="{{ route('logout') }}" class="mt-auto">
                         @csrf

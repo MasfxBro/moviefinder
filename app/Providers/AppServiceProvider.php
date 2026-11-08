@@ -9,8 +9,10 @@ use App\Contracts\MetadataProvider;
 use App\Contracts\PlanResolver;
 use App\Enums\Plan;
 use App\Models\SearchHistory;
+use App\Models\TitleRequest;
 use App\Models\Watchlist;
 use App\Policies\SearchHistoryPolicy;
+use App\Policies\TitleRequestPolicy;
 use App\Policies\WatchlistPolicy;
 use App\Services\Ai\FakeLlmClient;
 use App\Services\Ai\FreePlanResolver;
@@ -61,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Watchlist::class, WatchlistPolicy::class);
         Gate::policy(SearchHistory::class, SearchHistoryPolicy::class);
+        Gate::policy(TitleRequest::class, TitleRequestPolicy::class);
 
         Password::defaults(function () {
             return Password::min(10)
@@ -92,6 +95,14 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('report-link', function ($request) {
             return Limit::perDay(10)->by($request->user()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('request-title', function ($request) {
+            $user = $request->user();
+            $plan = $user ? app(PlanResolver::class)->resolve($user) : Plan::Free;
+            $limit = (int) (app(PlanCatalog::class)->get($plan)['requests_daily'] ?? 2);
+
+            return Limit::perDay($limit)->by($user?->id ?: $request->ip());
         });
     }
 }
