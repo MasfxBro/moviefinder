@@ -91,7 +91,7 @@
                     @foreach($posters->concat($posters) as $poster)
                         <div class="w-32 sm:w-48 shrink-0">
                             <img 
-                                src="https://image.tmdb.org/t/p/w342{{ $poster->poster_path }}" 
+                                src="{{ str_starts_with($poster->poster_path, 'local:') ? \Illuminate\Support\Facades\Storage::disk('public')->url(substr($poster->poster_path, 6)) : 'https://image.tmdb.org/t/p/w342' . $poster->poster_path }}" 
                                 alt="{{ $poster->title }}"
                                 class="rounded-lg shadow-lg grayscale hover:grayscale-0 transition-all duration-500"
                                 loading="lazy"

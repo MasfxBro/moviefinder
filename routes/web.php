@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminLoginController;
+use App\Http\Controllers\Admin\AdminTitleController;
 use App\Http\Controllers\Admin\AdminTwoFactorController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\BrowseController;
@@ -26,7 +28,19 @@ if ($adminPath !== '') {
         Route::get('/two-factor', AdminTwoFactorController::class)->middleware('hide-admin')->name('admin.2fa');
         Route::post('/two-factor', [AdminLoginController::class, 'verify'])->middleware(['hide-admin', 'throttle:5,1'])->name('admin.2fa.verify');
         Route::middleware('hide-admin')->group(function () {
-            Route::view('/', 'admin.dashboard')->name('admin.dashboard');
+            Route::get('/', AdminDashboardController::class)->name('admin.dashboard');
+
+            Route::get('/titles', [AdminTitleController::class, 'index'])->name('admin.titles.index');
+            Route::get('/titles/create', [AdminTitleController::class, 'create'])->name('admin.titles.create');
+            Route::post('/titles', [AdminTitleController::class, 'store'])->name('admin.titles.store');
+            Route::post('/titles/import', [AdminTitleController::class, 'import'])->name('admin.titles.import');
+            Route::post('/titles/bulk-import', [AdminTitleController::class, 'bulkImport'])->name('admin.titles.bulk_import');
+            Route::get('/titles/{title}/edit', [AdminTitleController::class, 'edit'])->name('admin.titles.edit');
+            Route::put('/titles/{title}', [AdminTitleController::class, 'update'])->name('admin.titles.update');
+            Route::post('/titles/{title}/toggle-hide', [AdminTitleController::class, 'toggleHide'])->name('admin.titles.toggle_hide');
+            Route::post('/titles/{title}/refresh', [AdminTitleController::class, 'refresh'])->name('admin.titles.refresh');
+            Route::get('/titles/{title}/delete', [AdminTitleController::class, 'confirmDelete'])->name('admin.titles.delete_confirm');
+            Route::delete('/titles/{title}', [AdminTitleController::class, 'destroy'])->name('admin.titles.destroy');
         });
     });
 }

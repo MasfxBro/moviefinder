@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -90,6 +91,21 @@ class Title extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function getPosterUrlAttribute(): ?string
+    {
+        if (! $this->poster_path) {
+            return null;
+        }
+
+        if (str_starts_with($this->poster_path, 'local:')) {
+            return Storage::disk('public')->url(substr($this->poster_path, 6));
+        }
+
+        $imageBase = config('services.tmdb.image_base', 'https://image.tmdb.org/t/p/');
+
+        return $imageBase.'w500'.$this->poster_path;
     }
 
     public static function generateUniqueSlug(string $title, ?int $year = null): string

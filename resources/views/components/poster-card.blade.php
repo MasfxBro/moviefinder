@@ -12,7 +12,11 @@
 
 @php
     $imageBase = config('services.tmdb.image_base', 'https://image.tmdb.org/t/p/');
-    $posterUrl = $poster ? $imageBase . 'w342' . $poster : null;
+    $posterUrl = $poster
+        ? (str_starts_with($poster, 'local:')
+            ? \Illuminate\Support\Facades\Storage::disk('public')->url(substr($poster, 6))
+            : $imageBase . 'w342' . $poster)
+        : null;
     $fullTitle = $title . ($year ? " ({$year})" : "");
 @endphp
 

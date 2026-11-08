@@ -5,7 +5,11 @@
 @php
     $imageBase = config('services.tmdb.image_base', 'https://image.tmdb.org/t/p/');
     $backdropUrl = $title->backdrop_path ? $imageBase . 'w1280' . $title->backdrop_path : null;
-    $posterUrl = $title->poster_path ? $imageBase . 'w500' . $title->poster_path : null;
+    $posterUrl = $title->poster_path
+        ? (str_starts_with($title->poster_path, 'local:')
+            ? \Illuminate\Support\Facades\Storage::disk('public')->url(substr($title->poster_path, 6))
+            : $imageBase . 'w500' . $title->poster_path)
+        : null;
 @endphp
 
 <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-card border border-border shadow-lg">
