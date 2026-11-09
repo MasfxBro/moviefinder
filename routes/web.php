@@ -83,6 +83,22 @@ if ($adminPath !== '') {
             Route::get('/channels/{channel}/edit', [AdminChannelAllowlistController::class, 'edit'])->name('admin.channels.edit');
             Route::put('/channels/{channel}', [AdminChannelAllowlistController::class, 'update'])->name('admin.channels.update');
             Route::delete('/channels/{channel}', [AdminChannelAllowlistController::class, 'destroy'])->name('admin.channels.destroy');
+
+            // Settings editor
+            Route::get('/settings', [\App\Http\Controllers\Admin\AdminSettingsController::class, 'index'])->name('admin.settings.index');
+            Route::post('/settings/{key}', [\App\Http\Controllers\Admin\AdminSettingsController::class, 'update'])->name('admin.settings.update');
+
+            // Announcements CRUD
+            Route::get('/announcements', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'index'])->name('admin.announcements.index');
+            Route::get('/announcements/create', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'create'])->name('admin.announcements.create');
+            Route::post('/announcements', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'store'])->name('admin.announcements.store');
+            Route::get('/announcements/{announcement}/edit', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'edit'])->name('admin.announcements.edit');
+            Route::put('/announcements/{announcement}', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'update'])->name('admin.announcements.update');
+            Route::delete('/announcements/{announcement}', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'destroy'])->name('admin.announcements.destroy');
+
+            // Feedback inbox
+            Route::get('/feedback', [\App\Http\Controllers\Admin\AdminFeedbackController::class, 'index'])->name('admin.feedback.index');
+            Route::post('/feedback/{feedback}/status', [\App\Http\Controllers\Admin\AdminFeedbackController::class, 'updateStatus'])->name('admin.feedback.update_status');
         });
     });
 }
