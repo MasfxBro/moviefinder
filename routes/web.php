@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AdminChannelAllowlistController;
+use App\Http\Controllers\Admin\AdminClipLinkController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\Admin\AdminMissedSearchController;
+use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminRequestController;
 use App\Http\Controllers\Admin\AdminTitleController;
 use App\Http\Controllers\Admin\AdminTwoFactorController;
@@ -55,6 +58,31 @@ if ($adminPath !== '') {
             Route::get('/missed-searches', [AdminMissedSearchController::class, 'index'])->name('admin.missed_searches.index');
             Route::post('/missed-searches/{searchMiss}/convert', [AdminMissedSearchController::class, 'convert'])->name('admin.missed_searches.convert');
             Route::post('/missed-searches/{searchMiss}/ignore', [AdminMissedSearchController::class, 'ignore'])->name('admin.missed_searches.ignore');
+
+            // Admin Clip Links CRUD & Verify / Bulk Remove
+            Route::get('/clip-links', [AdminClipLinkController::class, 'index'])->name('admin.clip_links.index');
+            Route::get('/clip-links/create', [AdminClipLinkController::class, 'create'])->name('admin.clip_links.create');
+            Route::post('/clip-links', [AdminClipLinkController::class, 'store'])->name('admin.clip_links.store');
+            Route::get('/clip-links/{clipLink}/edit', [AdminClipLinkController::class, 'edit'])->name('admin.clip_links.edit');
+            Route::put('/clip-links/{clipLink}', [AdminClipLinkController::class, 'update'])->name('admin.clip_links.update');
+            Route::delete('/clip-links/{clipLink}', [AdminClipLinkController::class, 'destroy'])->name('admin.clip_links.destroy');
+            Route::post('/clip-links/{clipLink}/verify', [AdminClipLinkController::class, 'verify'])->name('admin.clip_links.verify');
+            Route::post('/clip-links/bulk-remove', [AdminClipLinkController::class, 'bulkRemove'])->name('admin.clip_links.bulk_remove');
+
+            // Admin Reports Queue
+            Route::get('/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
+            Route::post('/reports/{linkReport}/restore', [AdminReportController::class, 'restore'])->name('admin.reports.restore');
+            Route::post('/reports/{linkReport}/remove-link', [AdminReportController::class, 'removeLink'])->name('admin.reports.remove_link');
+            Route::post('/reports/{linkReport}/block-channel', [AdminReportController::class, 'blockChannel'])->name('admin.reports.block_channel');
+            Route::post('/reports/{linkReport}/resolve', [AdminReportController::class, 'resolve'])->name('admin.reports.resolve');
+
+            // Admin Channel Allow-list CRUD
+            Route::get('/channels', [AdminChannelAllowlistController::class, 'index'])->name('admin.channels.index');
+            Route::get('/channels/create', [AdminChannelAllowlistController::class, 'create'])->name('admin.channels.create');
+            Route::post('/channels', [AdminChannelAllowlistController::class, 'store'])->name('admin.channels.store');
+            Route::get('/channels/{channel}/edit', [AdminChannelAllowlistController::class, 'edit'])->name('admin.channels.edit');
+            Route::put('/channels/{channel}', [AdminChannelAllowlistController::class, 'update'])->name('admin.channels.update');
+            Route::delete('/channels/{channel}', [AdminChannelAllowlistController::class, 'destroy'])->name('admin.channels.destroy');
         });
     });
 }

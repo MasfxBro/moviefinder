@@ -16,9 +16,13 @@
                     <span class="admin-badge inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-danger text-white tracking-wide">ADMIN</span>
                     <a href="{{ route('admin.dashboard') }}" class="font-bold text-lg text-text hover:text-accent transition-colors">MovieFinder Ops</a>
                 </div>
-                <nav class="hidden sm:flex items-center gap-4 text-sm font-medium">
+                <nav class="hidden sm:flex items-center gap-2 text-sm font-medium">
                     <a href="{{ route('admin.dashboard') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">Dashboard</a>
                     <a href="{{ route('admin.titles.index') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.titles.*') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">Titles</a>
+                    <a href="{{ route('admin.requests.index') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.requests.*') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">Requests</a>
+                    <a href="{{ route('admin.clip_links.index') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.clip_links.*') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">Clip Links</a>
+                    <a href="{{ route('admin.reports.index') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.reports.*') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">Reports</a>
+                    <a href="{{ route('admin.channels.index') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.channels.*') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">Channels</a>
                 </nav>
             </div>
             <div class="flex items-center gap-3 text-sm">
