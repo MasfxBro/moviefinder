@@ -1,15 +1,19 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AdminAnnouncementController;
 use App\Http\Controllers\Admin\AdminChannelAllowlistController;
 use App\Http\Controllers\Admin\AdminClipLinkController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminFeedbackController;
 use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\Admin\AdminMissedSearchController;
 use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminRequestController;
+use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminTitleController;
 use App\Http\Controllers\Admin\AdminTwoFactorController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\ClipReportController;
@@ -85,20 +89,34 @@ if ($adminPath !== '') {
             Route::delete('/channels/{channel}', [AdminChannelAllowlistController::class, 'destroy'])->name('admin.channels.destroy');
 
             // Settings editor
-            Route::get('/settings', [\App\Http\Controllers\Admin\AdminSettingsController::class, 'index'])->name('admin.settings.index');
-            Route::post('/settings/{key}', [\App\Http\Controllers\Admin\AdminSettingsController::class, 'update'])->name('admin.settings.update');
+            Route::get('/settings', [AdminSettingsController::class, 'index'])->name('admin.settings.index');
+            Route::post('/settings/{key}', [AdminSettingsController::class, 'update'])->name('admin.settings.update');
 
             // Announcements CRUD
-            Route::get('/announcements', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'index'])->name('admin.announcements.index');
-            Route::get('/announcements/create', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'create'])->name('admin.announcements.create');
-            Route::post('/announcements', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'store'])->name('admin.announcements.store');
-            Route::get('/announcements/{announcement}/edit', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'edit'])->name('admin.announcements.edit');
-            Route::put('/announcements/{announcement}', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'update'])->name('admin.announcements.update');
-            Route::delete('/announcements/{announcement}', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'destroy'])->name('admin.announcements.destroy');
+            Route::get('/announcements', [AdminAnnouncementController::class, 'index'])->name('admin.announcements.index');
+            Route::get('/announcements/create', [AdminAnnouncementController::class, 'create'])->name('admin.announcements.create');
+            Route::post('/announcements', [AdminAnnouncementController::class, 'store'])->name('admin.announcements.store');
+            Route::get('/announcements/{announcement}/edit', [AdminAnnouncementController::class, 'edit'])->name('admin.announcements.edit');
+            Route::put('/announcements/{announcement}', [AdminAnnouncementController::class, 'update'])->name('admin.announcements.update');
+            Route::delete('/announcements/{announcement}', [AdminAnnouncementController::class, 'destroy'])->name('admin.announcements.destroy');
 
             // Feedback inbox
-            Route::get('/feedback', [\App\Http\Controllers\Admin\AdminFeedbackController::class, 'index'])->name('admin.feedback.index');
-            Route::post('/feedback/{feedback}/status', [\App\Http\Controllers\Admin\AdminFeedbackController::class, 'updateStatus'])->name('admin.feedback.update_status');
+            Route::get('/feedback', [AdminFeedbackController::class, 'index'])->name('admin.feedback.index');
+            Route::post('/feedback/{feedback}/status', [AdminFeedbackController::class, 'updateStatus'])->name('admin.feedback.update_status');
+
+            // Admin Users API
+            Route::prefix('users')->name('admin.users.')->group(function () {
+                Route::get('/', [AdminUserController::class, 'index'])->name('index');
+                Route::get('/{user}', [AdminUserController::class, 'show'])->name('show');
+                Route::get('/{user}/watchlist', [AdminUserController::class, 'watchlist'])->name('watchlist');
+                Route::get('/{user}/history', [AdminUserController::class, 'history'])->name('history');
+                Route::post('/{user}/grant-plan', [AdminUserController::class, 'grantPlan'])->name('grantPlan');
+                Route::post('/{user}/revoke-plan', [AdminUserController::class, 'revokePlan'])->name('revokePlan');
+                Route::post('/{user}/suspend', [AdminUserController::class, 'suspend'])->name('suspend');
+                Route::post('/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('resetPassword');
+                Route::post('/{user}/reset-tour', [AdminUserController::class, 'resetTour'])->name('resetTour');
+                Route::delete('/{user}', [AdminUserController::class, 'destroy'])->name('destroy');
+            });
         });
     });
 }

@@ -51,10 +51,10 @@ class AdminFeedbackController extends Controller
             'handled_by' => $request->user('admin')?->id,
         ]);
 
-        if (!empty($validated['email_reply']) && $feedback->user && $feedback->user->email) {
+        if (! empty($validated['email_reply']) && $feedback->user && $feedback->user->email) {
             Mail::raw($validated['email_reply'], function ($message) use ($feedback) {
                 $message->to($feedback->user->email)
-                    ->subject('Regarding your feedback to ' . config('app.name'));
+                    ->subject('Regarding your feedback to '.config('app.name'));
             });
         }
 
@@ -62,7 +62,7 @@ class AdminFeedbackController extends Controller
             'old_status' => $oldStatus,
             'new_status' => $feedback->status,
             'admin_note' => $feedback->admin_note,
-            'emailed' => !empty($validated['email_reply']),
+            'emailed' => ! empty($validated['email_reply']),
         ]);
 
         return redirect()->back()->with('success', 'Feedback updated and status change audited.');

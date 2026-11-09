@@ -19,6 +19,7 @@ class AdminAnnouncementController extends Controller
             $query->where('kind', $type);
         }
         $announcements = $query->orderByDesc('starts_at')->paginate(20);
+
         return view('admin.announcements.index', compact('announcements'));
     }
 
@@ -37,6 +38,7 @@ class AdminAnnouncementController extends Controller
             'is_active' => 'required|boolean',
         ]);
         Announcement::create($validated);
+
         return redirect()->route('admin.announcements.index')->with('success', 'Announcement created');
     }
 
@@ -55,12 +57,14 @@ class AdminAnnouncementController extends Controller
             'is_active' => 'required|boolean',
         ]);
         $announcement->update($validated);
+
         return redirect()->route('admin.announcements.index')->with('success', 'Announcement updated');
     }
 
     public function destroy(Announcement $announcement): RedirectResponse
     {
         $announcement->delete();
+
         return redirect()->route('admin.announcements.index')->with('success', 'Announcement deleted');
     }
 }

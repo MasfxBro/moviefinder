@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Services\AuditLogger;
 use App\Services\Settings;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -18,13 +19,14 @@ class AdminSettingsController extends Controller
     public function index(Settings $settings): View
     {
         $all = \DB::table('settings')->orderBy('key')->get();
+
         return view('admin.settings.index', ['settings' => $all]);
     }
 
     /**
      * Update a setting.
      */
-    public function update(Request $request, Settings $settings, string $key): \Illuminate\Http\RedirectResponse
+    public function update(Request $request, Settings $settings, string $key): RedirectResponse
     {
         $allowed = ['plan.', 'ai.', 'billing.', 'features.', 'site.'];
         $valid = false;
@@ -35,7 +37,7 @@ class AdminSettingsController extends Controller
             }
         }
         if (! $valid) {
-            return redirect()->back()->with('error', "Invalid setting key.");
+            return redirect()->back()->with('error', 'Invalid setting key.');
         }
 
         $rules = ['value' => 'required'];
@@ -48,7 +50,8 @@ class AdminSettingsController extends Controller
         $value = $value === null ? $validated['value'] : $value;
         $settings->set($key, $value, $request->user('admin')?->id);
         // audit
-        app(\App\Services\AuditLogger::class)->log($request, 'settings.update', $key, ['old' => $old, 'new' => $validated['value']]);
+        app(AuditLogger::class)->log($request, 'settings.update', $key, ['old' => $old, 'new' => $validated['value']]);
+
         return redirect()->back()->with('success', "Setting {$key} updated.");
     }
 }
