@@ -27,7 +27,7 @@ class AccountController extends Controller
             'plan' => $plan,
             'limits' => $catalog->get($plan),
             'quota' => $quota,
-            'subscription' => null,
+            'subscription' => $user->subscriptions()->whereIn('status', ['active', 'past_due', 'canceled'])->latest()->first()?->only(['billing_mode', 'current_period_end']),
         ]);
     }
 

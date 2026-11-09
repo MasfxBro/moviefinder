@@ -6,6 +6,7 @@ use App\Contracts\ClipFinder;
 use App\Contracts\GroundedLlmClient;
 use App\Contracts\LlmClient;
 use App\Contracts\MetadataProvider;
+use App\Contracts\PaymentGateway;
 use App\Contracts\PlanResolver;
 use App\Enums\Plan;
 use App\Models\SearchHistory;
@@ -15,14 +16,15 @@ use App\Policies\SearchHistoryPolicy;
 use App\Policies\TitleRequestPolicy;
 use App\Policies\WatchlistPolicy;
 use App\Services\Ai\FakeLlmClient;
-use App\Services\Ai\FreePlanResolver;
 use App\Services\Ai\GeminiClient;
 use App\Services\Ai\PlanCatalog;
+use App\Services\BillingPlanResolver;
 use App\Services\Clips\AiSearchClipFinder;
 use App\Services\Clips\ClipFinderChain;
 use App\Services\Clips\CuratedClipFinder;
 use App\Services\Clips\SearchLinkFinder;
 use App\Services\Clips\StoredClipFinder;
+use App\Services\FakePaymentGateway;
 use App\Services\Tmdb\TmdbClient;
 use App\Services\Tmdb\TmdbMapper;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -53,7 +55,8 @@ class AppServiceProvider extends ServiceProvider
             $app->make(AiSearchClipFinder::class),
             $app->make(SearchLinkFinder::class),
         ]));
-        $this->app->bind(PlanResolver::class, FreePlanResolver::class);
+        $this->app->bind(PlanResolver::class, BillingPlanResolver::class);
+        $this->app->bind(PaymentGateway::class, FakePaymentGateway::class);
     }
 
     /**

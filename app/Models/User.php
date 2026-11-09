@@ -7,6 +7,8 @@ use App\Enums\Plan;
 use App\Enums\Role;
 use App\Notifications\ResetPassword;
 use App\Notifications\VerifyEmail;
+use App\Services\Ai\PlanCatalog;
+use App\Services\EntitlementService;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -71,10 +73,25 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === Role::Admin;
     }
 
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     public function plan(): Plan
     {
-        // ponytail: return Plan::Free until T-17 and T-37 add subscription logic
-        return Plan::Free;
+        return app(EntitlementService::class)->plan($this);
+    }
+
+    /** @return array<string, mixed> */
+    public function limits(): array
+    {
+        return app(PlanCatalog::class)->get($this->plan());
     }
 
     public function sendEmailVerificationNotification(): void

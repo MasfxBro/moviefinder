@@ -76,6 +76,9 @@
                             <x-slot name="content">
                                 <div class="px-4 py-2 border-b border-border">
                                     <p class="text-sm font-medium text-text truncate">{{ auth()->user()->name }}</p>
+                                    @if (auth()->user()->plan() !== \App\Enums\Plan::Free)
+                                        <span class="rounded bg-indigo-600 px-2 py-0.5 text-xs font-bold text-white">{{ strtoupper(auth()->user()->plan()->value) }}</span>
+                                    @endif
                                     <p class="text-xs text-muted truncate">{{ auth()->user()->email }}</p>
                                 </div>
 

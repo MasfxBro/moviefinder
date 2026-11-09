@@ -24,6 +24,9 @@
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                             <div>{{ Auth::user()->name }}</div>
+                            @if (Auth::user()->plan() !== \App\Enums\Plan::Free)
+                                <span class="ms-2 rounded bg-indigo-600 px-2 py-0.5 text-xs font-bold text-white">{{ strtoupper(Auth::user()->plan()->value) }}</span>
+                            @endif
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
