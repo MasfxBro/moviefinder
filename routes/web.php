@@ -140,7 +140,6 @@ Route::post('/billing/webhook', [BillingController::class, 'webhook'])->withoutM
 Route::get('/', HomeController::class)->name('home');
 
 Route::get('/pricing', [BillingController::class, 'pricing'])->name('pricing');
-Route::get('/billing/return', [BillingController::class, 'returned'])->name('billing.return');
 Route::view('/refund', 'legal.refund')->name('refund');
 Route::view('/terms', 'legal.terms')->name('terms');
 Route::view('/privacy', 'legal.privacy')->name('privacy');
@@ -183,7 +182,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
-    Route::get('/search', [TitleSearchController::class, '__invoke'])->name('search');
+    Route::get('/search', [TitleSearchController::class, '__invoke'])->middleware('throttle:60,1')->name('search');
 
     Route::get('/requests', [TitleRequestController::class, 'index'])->name('requests.index');
     Route::get('/requests/create', [TitleRequestController::class, 'create'])->name('requests.create');

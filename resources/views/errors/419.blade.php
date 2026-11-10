@@ -3,7 +3,7 @@
     title="Session expired"
     message="Your session expired. Reload the page and try again."
 >
-    <button onclick="window.location.reload()" class="inline-flex items-center justify-center px-4 py-2 bg-accent text-white font-medium text-sm rounded-lg hover:bg-accent/90 transition-colors">
+    <a href="{{ url()->current() }}" class="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90">
         Reload
-    </button>
+    </a>
 </x-error-page>

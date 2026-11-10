@@ -7,13 +7,13 @@
         <p class="mx-auto mt-8 max-w-2xl text-lg text-muted leading-relaxed">
             Stop searching by titles. Find movies and series by what actually happens in them, powered by AI that understands cinema.
         </p>
-        <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <x-button variant="primary" size="lg" onclick="window.location.href='{{ route('register') }}'">
+        <div class="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <a href="{{ route('register') }}" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-text transition-colors duration-150 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-bg">
                 Create account
-            </x-button>
-            <x-button variant="secondary" size="lg" onclick="window.location.href='{{ route('login') }}'">
+            </a>
+            <a href="{{ route('login') }}" class="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium text-text transition-colors duration-150 hover:bg-elevated focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-bg">
                 Log in
-            </x-button>
+            </a>
         </div>
     </div>
     

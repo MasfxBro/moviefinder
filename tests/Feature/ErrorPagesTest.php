@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 beforeEach(function () {
     Config::set('app.debug', false);
-    Config::set('app.admin_path', 'ops-secret-path-12345');
+    Config::set('admin.path', 'ops-secret-path-12345');
 });
 
 test('404 error page returns 404 status and exact copy', function () {
@@ -89,24 +89,17 @@ test('error pages contain no stack trace', function () {
     $response->assertDontSee('vendor/laravel/framework');
 });
 
-test('ADMIN_PATH text and real admin path never appear in error pages', function () {
-    $realAdminPath = config('app.admin_path');
+test('error pages contain no internal names or the admin path', function () {
+    $adminPath = config('admin.path');
 
-    $urls = [
-        '/unknown-url',
-        '/'.$realAdminPath.'/unknown',
-        '/test-403',
-        '/test-500',
-    ];
+    Route::get('/test-500-internal', fn () => throw new RuntimeException('InternalServiceName failure'));
 
-    Route::get('/test-403', fn () => abort(403));
-    Route::get('/test-500', fn () => throw new Exception('Test'));
-
-    foreach ($urls as $url) {
+    foreach (['/unknown-url', '/'.$adminPath.'/unknown', '/test-500-internal'] as $url) {
         $response = $this->get($url);
 
-        $response->assertDontSee('ADMIN_PATH');
-        $response->assertDontSee($realAdminPath);
+        $response->assertDontSee('ADMIN_PATH')
+            ->assertDontSee($adminPath)
+            ->assertDontSee('InternalServiceName');
     }
 });
 

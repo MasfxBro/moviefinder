@@ -19,9 +19,9 @@ export default function guidedTour(config = {}) {
             this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
             const block = document.getElementById('guided-tour-steps');
-            if (block && block.textContent) {
+            if (block && block.dataset.steps) {
                 try {
-                    this.allSteps = JSON.parse(block.textContent);
+                    this.allSteps = JSON.parse(block.dataset.steps);
                 } catch {
                     this.allSteps = [];
                 }

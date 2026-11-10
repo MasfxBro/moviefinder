@@ -40,6 +40,20 @@ test('new users can register', function () {
     expect($user->age_confirmed_at)->not->toBeNull();
 });
 
+test('registration ignores a hostile role', function () {
+    $this->post('/register', [
+        'name' => 'Regular User',
+        'email' => 'regular@example.com',
+        'password' => 'UniquePass2026!@#',
+        'password_confirmation' => 'UniquePass2026!@#',
+        'age_confirmed' => '1',
+        'terms_accepted' => '1',
+        'role' => 'admin',
+    ])->assertRedirect(route('dashboard', absolute: false));
+
+    expect(User::where('email', 'regular@example.com')->sole()->role->value)->toBe('user');
+});
+
 test('registration requires age confirmation', function () {
     $response = $this->post('/register', [
         'name' => 'Test User',

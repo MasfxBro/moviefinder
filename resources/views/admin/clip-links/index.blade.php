@@ -31,7 +31,7 @@
             <button type="submit" class="px-4 py-1.5 bg-elevated hover:bg-border text-text font-medium text-sm rounded-xl transition-colors">Filter</button>
         </form>
 
-        <form method="POST" action="{{ route('admin.clip_links.bulk_remove') }}" class="p-4 rounded-2xl bg-card border border-border flex gap-3 items-center" onsubmit="return confirm('Remove all active clips for this channel name?')">
+        <form method="POST" action="{{ route('admin.clip_links.bulk_remove') }}" class="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
             @csrf
             <input type="text" name="channel_name" placeholder="Channel name to bulk remove..." class="px-3 py-1.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:border-accent flex-1" required>
             <button type="submit" class="px-4 py-1.5 bg-danger/20 hover:bg-danger/30 text-danger font-medium text-sm rounded-xl transition-colors">Bulk Remove Channel</button>
@@ -82,7 +82,7 @@
                                 </form>
                             @endif
                             <a href="{{ route('admin.clip_links.edit', $clip) }}" class="text-xs text-text hover:underline">Edit</a>
-                            <form action="{{ route('admin.clip_links.destroy', $clip) }}" method="POST" class="inline" onsubmit="return confirm('Delete this clip link?')">
+                            <form action="{{ route('admin.clip_links.destroy', $clip) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-xs text-danger hover:underline">Delete</button>

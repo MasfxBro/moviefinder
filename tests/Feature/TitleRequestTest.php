@@ -195,6 +195,20 @@ test('blocks duplicate title requests by title and year', function () {
     $diffYearResponse->assertRedirect(route('requests.index'));
 });
 
+test('escapes a title request note containing script markup', function () {
+    $user = User::factory()->create();
+    $note = '<img src=x onerror=alert(1)>';
+
+    $this->actingAs($user)->post('/requests', [
+        'title' => 'Escaped Note Film',
+        'note' => $note,
+    ])->assertRedirect(route('requests.index'));
+
+    $this->actingAs($user)->get('/requests')
+        ->assertSee($note)
+        ->assertDontSee($note, false);
+});
+
 test('prevents IDOR: users cannot view another users title request', function () {
     $userA = User::factory()->create();
     $userB = User::factory()->create();

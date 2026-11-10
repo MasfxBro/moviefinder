@@ -26,7 +26,7 @@
     };
 
     $thumbnailUrl = $videoId
-        ? "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg"
+        ? "https://i.ytimg.com/vi/{$videoId}/hqdefault.jpg"
         : ($clip['thumbnail'] ?? null);
 
     $reportUrl = $id ? route('clips.report', $id) : null;

@@ -77,6 +77,16 @@ it('simulates demo checkout and activates plan without a gateway call', function
         ->and($user->payments()->latest()->first()->status)->toBe(PaymentStatus::Paid);
 });
 
+it('hides another user pending demo payment', function () {
+    config(['app.launch_mode' => 'demo']);
+    $owner = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $payment = billingPayment($owner);
+
+    $this->actingAs($otherUser)->get(route('billing.demo.checkout', $payment))->assertNotFound();
+    $this->actingAs($otherUser)->post(route('billing.demo.complete', $payment))->assertNotFound();
+});
+
 it('sends trusted server plan and price to Midtrans Snap for each supported checkout mode', function (string $plan, string $mode, string $method, array $methods, bool $recurring, int $price) {
     Http::preventStrayRequests();
     Http::fake(['app.sandbox.midtrans.com/snap/v1/transactions' => Http::response([

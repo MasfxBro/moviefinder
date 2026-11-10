@@ -50,7 +50,7 @@
                         <td class="p-4 text-muted text-xs">{{ $channel->notes ?? '—' }}</td>
                         <td class="p-4 text-right space-x-2">
                             <a href="{{ route('admin.channels.edit', $channel) }}" class="text-xs text-text hover:underline">Edit</a>
-                            <form action="{{ route('admin.channels.destroy', $channel) }}" method="POST" class="inline" onsubmit="return confirm('Remove channel from allow-list?')">
+                            <form action="{{ route('admin.channels.destroy', $channel) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-xs text-danger hover:underline">Delete</button>

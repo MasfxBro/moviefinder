@@ -102,10 +102,9 @@
 
                                 <form method="POST" action="{{ route('logout') }}" class="hidden lg:block">
                                     @csrf
-                                    <x-dropdown-link :href="route('logout')"
-                                        onclick="event.preventDefault(); this.closest('form').submit();">
+                                    <button type="submit" class="block w-full px-4 py-2 text-start text-sm leading-5 text-text transition duration-150 ease-in-out hover:bg-surface focus:bg-surface focus:outline-none">
                                         Log out
-                                    </x-dropdown-link>
+                                    </button>
                                 </form>
                             </x-slot>
                         </x-dropdown>
@@ -119,9 +118,9 @@
                         </a>
                     @endif
                     @if (Route::has('register'))
-                        <x-button variant="primary" onclick="window.location.href='{{ route('register') }}'">
+                        <a href="{{ route('register') }}" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-text transition-colors duration-150 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-bg">
                             Create account
-                        </x-button>
+                        </a>
                     @endif
                 </div>
             @endif

@@ -149,9 +149,4 @@ class BillingController extends Controller
 
         return redirect()->route('account.show')->with('status', 'payment-simulated');
     }
-
-    public function returned(): RedirectResponse
-    {
-        return redirect()->route('account.show')->with('status', 'payment-pending');
-    }
 }

@@ -8,12 +8,13 @@
     :message="'Too many requests. Try again in ' . $seconds . ' seconds.'"
 >
     <div x-data="{ seconds: {{ (int) $seconds }} }" x-init="if (seconds > 0) { const timer = setInterval(() => { if (--seconds <= 0) clearInterval(timer) }, 1000) }">
-        <button
-            :disabled="seconds > 0"
-            onclick="window.location.reload()"
-            class="inline-flex items-center justify-center px-4 py-2 bg-accent text-white font-medium text-sm rounded-lg hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        <a
+            href="{{ url()->current() }}"
+            x-bind:aria-disabled="seconds > 0"
+            x-bind:class="seconds > 0 ? 'pointer-events-none opacity-50 cursor-not-allowed' : 'hover:bg-accent/90'"
+            class="inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors"
         >
             Try again
-        </button>
+        </a>
     </div>
 </x-error-page>

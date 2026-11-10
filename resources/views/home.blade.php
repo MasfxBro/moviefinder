@@ -175,7 +175,7 @@
             @endif
 
             @if(!empty($tourSteps))
-                <script id="guided-tour-steps" type="application/json">@json($tourSteps)</script>
+                <div id="guided-tour-steps" data-steps="{{ json_encode($tourSteps) }}" hidden></div>
                 <x-tour-step :start-immediately="$startTour ?? false" />
             @endif
         </div>

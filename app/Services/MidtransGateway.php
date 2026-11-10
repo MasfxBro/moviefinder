@@ -21,10 +21,10 @@ class MidtransGateway implements PaymentGateway
                 'customer_details' => ['email' => $payment->user->email, 'first_name' => $payment->user->name],
                 'enabled_payments' => $methods,
                 'credit_card' => ['secure' => true, 'save_card' => $autoRenew, 'installment' => ['terms' => ['bni' => [3], 'mandiri' => [3]]]],
-                'gopay' => ['enable_callback' => true, 'callback_url' => route('billing.return')],
+                'gopay' => ['enable_callback' => true, 'callback_url' => route('account.show')],
                 'recurring' => $autoRenew ? ['required' => true, 'start_time' => now()->addMinutes(10)->format('Y-m-d H:i:s O'), 'interval_unit' => 'month'] : null,
                 'item_details' => [['id' => $payment->plan->value, 'price' => $payment->amount, 'quantity' => 1, 'name' => ucfirst($payment->plan->value).' monthly plan']],
-                'callbacks' => ['finish' => route('billing.return')],
+                'callbacks' => ['finish' => route('account.show')],
                 'custom_expiry' => ['order_time' => now()->format('Y-m-d H:i:s O'), 'expiry_duration' => 60, 'unit' => 'minute'],
             ])->throw()->json();
 

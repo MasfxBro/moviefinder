@@ -37,14 +37,12 @@
         @if (session('success'))
             <div class="mb-6 p-4 rounded-xl bg-success/10 border border-success/30 text-success text-sm flex items-center justify-between" role="status">
                 <span>{{ session('success') }}</span>
-                <button type="button" onclick="this.parentElement.remove()" class="text-success hover:opacity-75">&times;</button>
             </div>
         @endif
 
         @if (session('error'))
             <div class="mb-6 p-4 rounded-xl bg-danger/10 border border-danger/30 text-danger text-sm flex items-center justify-between" role="alert">
                 <span>{{ session('error') }}</span>
-                <button type="button" onclick="this.parentElement.remove()" class="text-danger hover:opacity-75">&times;</button>
             </div>
         @endif
 

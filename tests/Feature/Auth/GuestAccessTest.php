@@ -33,6 +33,29 @@ test('guests cannot access protected routes', function () {
     $response->assertRedirect();
 });
 
+test('guests are redirected from every protected GET route', function () {
+    $paths = [
+        '/account',
+        '/ai/status',
+        '/browse',
+        '/dashboard',
+        '/feedback',
+        '/history',
+        '/history/recent',
+        '/profile',
+        '/requests',
+        '/requests/create',
+        '/search?q=Matrix',
+        '/titles/example',
+        '/verify-email',
+        '/watchlist',
+    ];
+
+    foreach ($paths as $path) {
+        $this->get($path)->assertRedirect(route('login'));
+    }
+});
+
 test('unverified users cannot access verified routes', function () {
     $user = User::factory()->unverified()->create();
 

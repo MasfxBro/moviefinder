@@ -34,8 +34,7 @@
                     src="{{ $posterUrl }}"
                     alt="Poster of {{ $title }}"
                     loading="lazy"
-                    class="w-full h-full object-cover transition-opacity duration-300"
-                    onerror="this.src='https://via.placeholder.com/342x513?text=No+Poster'; this.onerror=null;"
+                    class="h-full w-full object-cover transition-opacity duration-300"
                 >
             @else
                 <div class="flex items-center justify-center w-full h-full text-faint">

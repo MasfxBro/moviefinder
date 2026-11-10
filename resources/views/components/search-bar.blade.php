@@ -74,7 +74,7 @@
                         focused === index ? 'bg-accent text-text' : 'bg-elevated text-text hover:bg-surface',
                     ]"
                 >
-                    <div class="font-medium" x-html="highlight(query, result.title)"></div>
+                    <div class="font-medium" x-text="result.title"></div>
                     <div class="text-xs text-muted">
                         <span x-text="result.media_type"></span>
                         <template x-if="result.release_year">

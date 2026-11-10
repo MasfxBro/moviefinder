@@ -7,7 +7,7 @@
             </div>
 
             @if ($history->isNotEmpty())
-                <form method="POST" action="{{ route('history.destroy') }}" onsubmit="return confirm('Clear your entire search history?');">
+                <form method="POST" action="{{ route('history.destroy') }}">
                     @csrf
                     @method('DELETE')
                     <x-button variant="secondary" type="submit">Clear all</x-button>

@@ -31,9 +31,9 @@
             >
                 @if (Route::has('requests.create'))
                     <x-slot:action>
-                        <x-button variant="primary" onclick="window.location.href='{{ route('requests.create') }}'">
+                        <a href="{{ route('requests.create') }}" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-text transition-colors duration-150 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-bg">
                             Request this title
-                        </x-button>
+                        </a>
                     </x-slot:action>
                 @endif
             </x-empty-state>

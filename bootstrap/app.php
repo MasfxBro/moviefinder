@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureUserNotSuspended;
 use App\Http\Middleware\EnsureVerifiedForAi;
 use App\Http\Middleware\HideAdminFromPublic;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetRequestId;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,7 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->preventRequestForgery(except: ['billing/webhook']);
-        $middleware->prepend(SetRequestId::class);
+        $middleware->prepend([
+            SecurityHeaders::class,
+            SetRequestId::class,
+        ]);
         $middleware->appendToGroup('web', [
             AuthenticateSession::class,
             EnsureUserNotSuspended::class,

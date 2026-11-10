@@ -54,7 +54,7 @@
                                 <button type="submit" class="px-3 py-1.5 bg-danger/20 hover:bg-danger/30 text-danger text-xs font-semibold rounded-lg transition-colors">Remove Link</button>
                             </form>
                             @if (filled($report->clipLink->channel_name))
-                                <form action="{{ route('admin.reports.block_channel', $report) }}" method="POST" onsubmit="return confirm('Block channel and remove all its clips?')">
+                                <form action="{{ route('admin.reports.block_channel', $report) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="px-3 py-1.5 bg-danger text-white text-xs font-semibold rounded-lg transition-colors">Block Channel</button>
                                 </form>

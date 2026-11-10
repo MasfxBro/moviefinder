@@ -101,15 +101,6 @@ export default function liveSearch() {
             window.location.href = `/search?q=${encodeURIComponent(term)}`;
         },
 
-        highlight(term, text) {
-            if (!term) return text;
-            const re = new RegExp(`(${this.escapeRegExp(term)})`, 'gi');
-            return text.replace(re, '<mark>$1</mark>');
-        },
-
-        escapeRegExp(string) {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        },
 
         keydown(e) {
             const isRecentMode = this.query.trim().length < 2 && this.recent.length > 0;

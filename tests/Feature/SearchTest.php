@@ -44,6 +44,18 @@ test('search endpoint returns results', function () {
         ->assertJsonFragment(['slug' => 'the-matrix-1999']);
 });
 
+test('search results render title markup as text', function () {
+    $user = User::factory()->create();
+    $title = '<img src=x onerror=alert(1)>';
+    Title::factory()->create(['title' => $title]);
+
+    $response = $this->actingAs($user)->get('/search?q=img');
+
+    $response->assertOk()
+        ->assertSee($title)
+        ->assertDontSee($title, false);
+});
+
 test('search page renders not-found state with request button', function () {
     $user = User::factory()->create();
 
