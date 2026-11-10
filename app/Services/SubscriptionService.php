@@ -11,6 +11,8 @@ use App\Enums\SubscriptionStatus;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Notifications\PaymentFailed;
+use App\Notifications\PaymentSucceeded;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -75,8 +77,9 @@ class SubscriptionService
             $start = $subscription->billing_mode === 'manual' && $subscription->current_period_end?->isFuture()
                 ? $subscription->current_period_end
                 : now();
-            $subscription->update(['plan' => $plan, 'pending_plan' => null, 'status' => SubscriptionStatus::Active, 'current_period_start' => now(), 'current_period_end' => $subscription->billing_mode === 'manual' ? $start->copy()->addDays(30) : now()->addMonth(), 'cancel_at_period_end' => false, 'canceled_at' => null, 'grace_ends_at' => null]);
+            $subscription->update(['plan' => $plan, 'pending_plan' => null, 'status' => SubscriptionStatus::Active, 'current_period_start' => now(), 'current_period_end' => $subscription->billing_mode === 'manual' ? $start->copy()->addDays(30) : now()->addMonth(), 'cancel_at_period_end' => false, 'canceled_at' => null, 'grace_ends_at' => null, 'reminder_sent_at' => null]);
             $payment->update(['status' => 'paid', 'paid_at' => now(), 'subscription_id' => $subscription->id]);
+            $payment->user?->notify(new PaymentSucceeded($payment));
         });
     }
 
@@ -86,7 +89,9 @@ class SubscriptionService
             return;
         }
 
-        $subscription->update(['status' => SubscriptionStatus::PastDue, 'grace_ends_at' => now()->addDays(3)]);
+        $graceEndsAt = now()->addDays((int) app(Settings::class)->get('billing.grace_days', config('billing.grace_days', 3)));
+        $subscription->update(['status' => SubscriptionStatus::PastDue, 'grace_ends_at' => $graceEndsAt]);
+        $subscription->user->notify(new PaymentFailed($subscription, $graceEndsAt));
     }
 
     public function cancel(Subscription $subscription): void

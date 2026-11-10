@@ -9,6 +9,7 @@ use App\Models\Feedback;
 use App\Models\LinkReport;
 use App\Models\TitleRequest;
 use App\Models\User;
+use App\Services\Admin\AiMonitoringService;
 use App\Services\Settings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +17,7 @@ use Illuminate\View\View;
 
 class AdminDashboardController extends Controller
 {
-    public function __invoke(Settings $settings): View
+    public function __invoke(Settings $settings, AiMonitoringService $aiMonitoring): View
     {
         // 1. Users
         $totalUsers = User::count();
@@ -62,6 +63,7 @@ class AdminDashboardController extends Controller
         }
 
         $profitMargin = $revenueThisMonth - $aiCostThisMonth - $gatewayFeesThisMonth;
+        $profitByPlan = $aiMonitoring->profitByPlan();
 
         // 4. AI usage today vs global cap
         $aiUsageToday = 0;
@@ -115,6 +117,7 @@ class AdminDashboardController extends Controller
             'gatewayFeesThisMonth' => $gatewayFeesThisMonth,
             'aiCostThisMonth' => $aiCostThisMonth,
             'profitMargin' => $profitMargin,
+            'profitByPlan' => $profitByPlan,
             'aiUsageToday' => $aiUsageToday,
             'globalDailyCap' => $globalDailyCap,
             'clipResolverBudget' => $clipResolverBudget,

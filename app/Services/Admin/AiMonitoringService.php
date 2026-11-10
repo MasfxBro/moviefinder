@@ -17,6 +17,25 @@ class AiMonitoringService
         return $usage ? (array) $usage : [];
     }
 
+    /** @return array<string, array{revenue: int, fees: int, ai_cost: int, margin: int}> */
+    public function profitByPlan(): array
+    {
+        $results = ['plus' => ['revenue' => 0, 'fees' => 0, 'ai_cost' => 0, 'margin' => 0], 'pro' => ['revenue' => 0, 'fees' => 0, 'ai_cost' => 0, 'margin' => 0]];
+        foreach (DB::table('payments')->where('status', 'paid')->where('paid_at', '>=', now()->startOfMonth())->groupBy('plan')->select('plan', DB::raw('sum(amount) as revenue'), DB::raw('sum(est_fee_idr) as fees'))->get() as $row) {
+            $results[$row->plan]['revenue'] = (int) $row->revenue;
+            $results[$row->plan]['fees'] = (int) $row->fees;
+        }
+        foreach (DB::table('ai_usage_log')->join('subscriptions', 'subscriptions.user_id', '=', 'ai_usage_log.user_id')->where('ai_usage_log.created_at', '>=', now()->startOfMonth())->whereIn('subscriptions.status', ['active', 'past_due', 'canceled'])->groupBy('subscriptions.plan')->select('subscriptions.plan', DB::raw('sum(ai_usage_log.cost_idr) as cost'))->get() as $row) {
+            $results[$row->plan]['ai_cost'] = (int) $row->cost;
+        }
+        foreach ($results as &$plan) {
+            $plan['margin'] = $plan['revenue'] - $plan['fees'] - $plan['ai_cost'];
+        }
+        unset($plan);
+
+        return $results;
+    }
+
     public function systemHealth(): array
     {
         return [
@@ -30,6 +49,7 @@ class AiMonitoringService
             'cache_hit_rate' => Cache::get('cache.hit_rate', null),
             'db_size_mb' => $this->dbSize(),
             'app_version' => app()->version(),
+            'profit_by_plan' => $this->profitByPlan(),
         ];
     }
 

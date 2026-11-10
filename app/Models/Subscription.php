@@ -30,7 +30,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $grace_ends_at
  * @property bool $cancel_at_period_end
  */
-#[Fillable(['user_id', 'plan', 'billing_mode', 'payment_method', 'pending_plan', 'status', 'source', 'gateway_subscription_id', 'gateway_token', 'gateway_account_id', 'current_period_start', 'current_period_end', 'cancel_at_period_end', 'canceled_at', 'grace_ends_at', 'manual_reason', 'granted_by'])]
+#[Fillable(['user_id', 'plan', 'billing_mode', 'payment_method', 'pending_plan', 'status', 'source', 'gateway_subscription_id', 'gateway_token', 'gateway_account_id', 'current_period_start', 'current_period_end', 'cancel_at_period_end', 'canceled_at', 'grace_ends_at', 'reminder_sent_at', 'manual_reason', 'granted_by'])]
 class Subscription extends Model
 {
     protected function casts(): array

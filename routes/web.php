@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AdminAiMonitoringController;
 use App\Http\Controllers\Admin\AdminAnnouncementController;
+use App\Http\Controllers\Admin\AdminBillingController;
 use App\Http\Controllers\Admin\AdminChannelAllowlistController;
 use App\Http\Controllers\Admin\AdminClipLinkController;
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -43,6 +45,12 @@ if ($adminPath !== '') {
         Route::post('/two-factor', [AdminLoginController::class, 'verify'])->middleware(['hide-admin', 'throttle:5,1'])->name('admin.2fa.verify');
         Route::middleware('hide-admin')->group(function () {
             Route::get('/', AdminDashboardController::class)->name('admin.dashboard');
+            Route::get('/ai-monitoring', AdminAiMonitoringController::class)->name('admin.ai-monitoring.index');
+            Route::get('/billing', [AdminBillingController::class, 'index'])->name('admin.billing.index');
+            Route::get('/billing/export', [AdminBillingController::class, 'export'])->name('admin.billing.export');
+            Route::get('/billing/subscriptions/{subscription}', [AdminBillingController::class, 'show'])->name('admin.billing.show');
+            Route::post('/billing/subscriptions/{subscription}/cancel', [AdminBillingController::class, 'cancel'])->name('admin.billing.cancel');
+            Route::post('/billing/grants', [AdminBillingController::class, 'grant'])->name('admin.billing.grant');
 
             Route::get('/titles', [AdminTitleController::class, 'index'])->name('admin.titles.index');
             Route::get('/titles/create', [AdminTitleController::class, 'create'])->name('admin.titles.create');

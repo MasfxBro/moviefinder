@@ -59,6 +59,8 @@
         </div>
     </div>
 
+    <section class="p-5 rounded-2xl bg-card border border-border"><h2 class="text-sm uppercase font-semibold tracking-wider text-muted mb-3">Profit by plan (month to date)</h2><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">@foreach ($profitByPlan as $plan => $totals)<div class="p-4 rounded-xl bg-surface"><h3 class="font-semibold capitalize">{{ $plan }}</h3><p class="text-xs text-muted">Revenue IDR {{ number_format($totals['revenue']) }} · Fees IDR {{ number_format($totals['fees']) }} · AI IDR {{ number_format($totals['ai_cost']) }}</p><p class="font-bold {{ $totals['margin'] >= 0 ? 'text-success' : 'text-danger' }}">Margin IDR {{ number_format($totals['margin']) }}</p></div>@endforeach</div></section>
+
     {{-- Secondary Metrics --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {{-- AI Quota & Budget --}}

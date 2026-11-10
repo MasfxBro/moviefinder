@@ -18,6 +18,8 @@
                 </div>
                 <nav class="hidden sm:flex items-center gap-2 text-sm font-medium">
                     <a href="{{ route('admin.dashboard') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">Dashboard</a>
+                    <a href="{{ route('admin.ai-monitoring.index') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.ai-monitoring.*') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">AI Monitoring</a>
+                    <a href="{{ route('admin.billing.index') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.billing.*') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">Billing</a>
                     <a href="{{ route('admin.titles.index') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.titles.*') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">Titles</a>
                     <a href="{{ route('admin.requests.index') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.requests.*') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">Requests</a>
                     <a href="{{ route('admin.clip_links.index') }}" class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('admin.clip_links.*') ? 'bg-card text-accent' : 'text-muted hover:text-text hover:bg-card/50' }}">Clip Links</a>
