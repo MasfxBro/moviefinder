@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'launch_mode' => env('LAUNCH_MODE', 'demo'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

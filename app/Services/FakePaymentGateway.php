@@ -15,4 +15,8 @@ class FakePaymentGateway implements PaymentGateway
     }
 
     public function cancel(string $subscriptionId): void {}
+
+    public function updateSubscription(string $subscriptionId, int $amount, string $token, string $method, ?string $accountId = null): void {}
+
+    public function resume(string $subscriptionId): void {}
 }

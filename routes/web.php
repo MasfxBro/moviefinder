@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AdminTitleController;
 use App\Http\Controllers\Admin\AdminTwoFactorController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\AiController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\ClipReportController;
 use App\Http\Controllers\FeedbackController;
@@ -27,7 +28,11 @@ use App\Http\Controllers\TitleRequestController;
 use App\Http\Controllers\TitleSearchController;
 use App\Http\Controllers\VersionController;
 use App\Http\Controllers\WatchlistController;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 $adminPath = trim((string) config('admin.path'), '/');
 if ($adminPath !== '') {
@@ -121,10 +126,14 @@ if ($adminPath !== '') {
     });
 }
 
+Route::post('/billing/webhook', [BillingController::class, 'webhook'])->withoutMiddleware([StartSession::class, AuthenticateSession::class, PreventRequestForgery::class, ShareErrorsFromSession::class])->name('billing.webhook');
+
 // Public routes (D-35: guests allowed)
 Route::get('/', HomeController::class)->name('home');
 
-Route::view('/pricing', 'pricing')->name('pricing');
+Route::get('/pricing', [BillingController::class, 'pricing'])->name('pricing');
+Route::get('/billing/return', [BillingController::class, 'returned'])->name('billing.return');
+Route::view('/refund', 'legal.refund')->name('refund');
 Route::view('/terms', 'legal.terms')->name('terms');
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/copyright', 'legal.copyright')->name('copyright');
@@ -149,6 +158,11 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::post('/billing/checkout', [BillingController::class, 'checkout'])->middleware('throttle:checkout')->name('billing.checkout');
+    Route::get('/billing/demo/{payment}', [BillingController::class, 'demoCheckout'])->name('billing.demo.checkout');
+    Route::post('/billing/demo/{payment}/complete', [BillingController::class, 'demoComplete'])->name('billing.demo.complete');
+    Route::post('/account/subscription/cancel', [BillingController::class, 'cancel'])->name('account.subscription.cancel');
+    Route::post('/account/subscription/resume', [BillingController::class, 'resume'])->name('account.subscription.resume');
     Route::get('/account', [AccountController::class, 'show'])->name('account.show');
     Route::patch('/account/name', [AccountController::class, 'updateName'])->name('account.name.update');
     Route::delete('/account', [AccountController::class, 'destroy'])->name('account.destroy');

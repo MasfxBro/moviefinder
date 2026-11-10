@@ -15,8 +15,8 @@
         <x-announcement-banner />
         <x-navbar :guest="true" />
 
-        <main class="flex-1 flex flex-col sm:justify-center items-center pt-6 sm:pt-0 px-4">
-            <div class="w-full sm:max-w-md my-8 p-6 bg-card border border-border rounded-2xl shadow-xl">
+        <main class="flex-1 w-full px-4 py-6">
+            <div class="mx-auto w-full {{ request()->routeIs('pricing') ? 'max-w-7xl' : 'sm:max-w-md' }} my-2 {{ request()->routeIs('pricing') ? '' : 'p-6' }} bg-card border border-border rounded-2xl shadow-xl">
                 {{ $slot }}
             </div>
         </main>

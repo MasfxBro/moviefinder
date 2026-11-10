@@ -72,7 +72,9 @@ class Settings
 
         // plan.free.daily_units -> config('plans.free.daily_units')
         if ($parts[0] === 'plan' && isset($parts[1])) {
-            return config('plans.'.$parts[1].'.'.implode('.', array_slice($parts, 2)));
+            $path = implode('.', array_slice($parts, 2));
+
+            return $path === '' ? config('plans.'.$parts[1]) : config('plans.'.$parts[1].'.'.$path);
         }
 
         // ai.cost.standard_input -> config('ai.cost.standard_input')

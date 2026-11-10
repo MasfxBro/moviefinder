@@ -24,7 +24,7 @@ use App\Services\Clips\ClipFinderChain;
 use App\Services\Clips\CuratedClipFinder;
 use App\Services\Clips\SearchLinkFinder;
 use App\Services\Clips\StoredClipFinder;
-use App\Services\FakePaymentGateway;
+use App\Services\MidtransGateway;
 use App\Services\Tmdb\TmdbClient;
 use App\Services\Tmdb\TmdbMapper;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -56,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
             $app->make(SearchLinkFinder::class),
         ]));
         $this->app->bind(PlanResolver::class, BillingPlanResolver::class);
-        $this->app->bind(PaymentGateway::class, FakePaymentGateway::class);
+        $this->app->bind(PaymentGateway::class, MidtransGateway::class);
     }
 
     /**
@@ -77,6 +77,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Rate limiter for email verification resend (SECURITY.md section 6)
+        RateLimiter::for('checkout', function ($request) {
+            return Limit::perHour(10)->by($request->user()?->id ?: $request->ip());
+        });
+
         RateLimiter::for('ai-messages', function ($request) {
             $plan = $request->user() ? app(PlanResolver::class)->resolve($request->user()) : Plan::Free;
             $limit = (int) (app(PlanCatalog::class)->get($plan)['ai_rate_limit_per_minute'] ?? 6);

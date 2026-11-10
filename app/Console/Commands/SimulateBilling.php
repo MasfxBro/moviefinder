@@ -7,7 +7,9 @@ namespace App\Console\Commands;
 use App\Enums\Plan;
 use App\Enums\SubscriptionStatus;
 use App\Models\Payment;
+use App\Models\Subscription;
 use App\Models\User;
+use App\Services\FakePaymentGateway;
 use App\Services\SubscriptionService;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -19,7 +21,7 @@ use RuntimeException;
 #[Description('Simulate billing transitions outside production.')]
 class SimulateBilling extends Command
 {
-    public function handle(SubscriptionService $service): int
+    public function handle(): int
     {
         if (app()->isProduction()) {
             $this->error('Billing simulation is disabled in production.');
@@ -45,16 +47,20 @@ class SimulateBilling extends Command
         }
 
         $user = User::findOrFail($this->argument('user'));
+        $service = new SubscriptionService(new FakePaymentGateway);
         $action = $this->argument('action');
-        $subscription = $user->subscriptions()->where('billing_mode', $this->option('mode'))->latest()->first();
+        $subscription = Subscription::query()->where('user_id', $user->id)->where('billing_mode', $this->option('mode'))->latest()->first();
         if ($action === 'renew') {
             if (! $subscription) {
                 $subscription = $service->start($user, Plan::from($this->option('plan')), $this->option('mode'));
             }
-            if ($subscription->status === SubscriptionStatus::Expired) {
+            if ($subscription->getRawOriginal('status') === SubscriptionStatus::Expired->value) {
                 $subscription = $service->start($user, Plan::from($this->option('plan')), $this->option('mode'));
             }
             $payment = Payment::create(['user_id' => $user->id, 'subscription_id' => $subscription->id, 'gateway_order_id' => 'sim-'.bin2hex(random_bytes(12)), 'plan' => Plan::from($this->option('plan')), 'amount' => (int) config('plans.'.$this->option('plan').'.price_idr', 0), 'status' => 'pending']);
+            if (! (new FakePaymentGateway)->charge($payment)) {
+                return self::FAILURE;
+            }
             $service->renew($subscription, $payment);
         } elseif (! $subscription) {
             throw new RuntimeException('No subscription found for user.');

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'active', 'past_due', 'canceled', 'expired']);
             $table->enum('source', ['midtrans', 'manual'])->default('midtrans');
             $table->string('gateway_subscription_id')->nullable()->unique();
+            $table->text('gateway_token')->nullable();
             $table->timestamp('current_period_start')->nullable();
             $table->timestamp('current_period_end')->nullable();
             $table->boolean('cancel_at_period_end')->default(false);

@@ -29,6 +29,9 @@
                 <a href="{{ url('/browse?type=tv') }}" class="text-sm font-medium text-muted hover:text-text transition-colors">
                     TV Shows
                 </a>
+                <a href="{{ route('pricing') }}" class="text-sm font-medium text-muted hover:text-text transition-colors">
+                    Pricing
+                </a>
             </div>
         </div>
 
@@ -77,7 +80,7 @@
                                 <div class="px-4 py-2 border-b border-border">
                                     <p class="text-sm font-medium text-text truncate">{{ auth()->user()->name }}</p>
                                     @if (auth()->user()->plan() !== \App\Enums\Plan::Free)
-                                        <span class="rounded bg-indigo-600 px-2 py-0.5 text-xs font-bold text-white">{{ strtoupper(auth()->user()->plan()->value) }}</span>
+                                        <x-plan-badge :plan="strtoupper(auth()->user()->plan()->value)" />
                                     @endif
                                     <p class="text-xs text-muted truncate">{{ auth()->user()->email }}</p>
                                 </div>
@@ -166,6 +169,7 @@
                         <a href="{{ url('/') }}" class="min-h-[44px] flex items-center text-sm font-medium text-text hover:text-accent">Home</a>
                         <a href="{{ url('/browse?type=movie') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">Movies</a>
                         <a href="{{ url('/browse?type=tv') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">TV Shows</a>
+                        <a href="{{ route('pricing') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">Pricing</a>
                         <a href="{{ route('history.index') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">Search history</a>
                         <a href="{{ route('requests.index') }}" class="min-h-[44px] flex items-center text-sm font-medium text-muted hover:text-text">My requests</a>
                     </nav>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\PaymentGateway;
+use App\Enums\PaymentStatus;
 use App\Enums\Plan;
 use App\Enums\SubscriptionStatus;
 use App\Models\Payment;
@@ -25,10 +26,15 @@ class SubscriptionService
 
         return DB::transaction(function () use ($user, $plan, $mode, $method): Subscription {
             $current = $user->subscriptions()->where('billing_mode', $mode)->whereIn('status', ['active', 'past_due', 'pending'])->latest()->lockForUpdate()->first();
-            if ($current && $current->status === SubscriptionStatus::Pending && $current->plan === $plan) {
+            if ($current && $current->getRawOriginal('plan') === Plan::Pro->value && $plan->value === Plan::Plus->value && in_array($current->getRawOriginal('status'), [SubscriptionStatus::Active->value, SubscriptionStatus::PastDue->value], true)) {
+                $current->update(['pending_plan' => $plan]);
+
                 return $current;
             }
-            if ($current && $current->billing_mode === $mode && $this->rank($plan) < $this->rank($current->plan)) {
+            if ($current && $current->getRawOriginal('status') === SubscriptionStatus::Pending->value && $current->getRawOriginal('plan') === $plan->value) {
+                return $current;
+            }
+            if ($current && $current->billing_mode === $mode && $this->rank($plan) < $this->rank($current->getRawOriginal('plan') instanceof Plan ? $current->getRawOriginal('plan') : Plan::from($current->getRawOriginal('plan')))) {
                 $current->update(['pending_plan' => $plan]);
 
                 return $current;
@@ -47,7 +53,18 @@ class SubscriptionService
     {
         DB::transaction(function () use ($subscription, $payment): void {
             $subscription->refresh();
+            $payment = Payment::query()->whereKey($payment->id)->lockForUpdate()->firstOrFail();
             $plan = $subscription->pending_plan ?? $payment->plan;
+            if ($payment->status !== PaymentStatus::Pending && $subscription->pending_plan === null) {
+                return;
+            }
+            if ($subscription->billing_mode === 'auto' && $subscription->pending_plan && $subscription->gateway_subscription_id) {
+                if (! $subscription->gateway_token) {
+                    throw new InvalidArgumentException('Gateway token unavailable for subscription update.');
+                }
+                $amount = (int) config('plans.'.$plan->value.'.price_idr');
+                $this->gateway->updateSubscription($subscription->gateway_subscription_id, $amount, $subscription->gateway_token, $subscription->payment_method ?? 'credit_card', $subscription->gateway_account_id);
+            }
             $current = $subscription->user->subscriptions()->where('id', '!=', $subscription->id)->whereIn('status', ['active', 'past_due', 'canceled'])->lockForUpdate()->get();
             foreach ($current as $old) {
                 if ($old->gateway_subscription_id) {
@@ -82,6 +99,16 @@ class SubscriptionService
             $this->gateway->cancel($subscription->gateway_subscription_id);
         }
         $subscription->update(['status' => SubscriptionStatus::Canceled, 'cancel_at_period_end' => true, 'canceled_at' => now()]);
+    }
+
+    public function resume(Subscription $subscription): void
+    {
+        if ($subscription->billing_mode !== 'auto' || ! $subscription->gateway_subscription_id || $subscription->current_period_end?->isPast()) {
+            throw new InvalidArgumentException('Subscription cannot be resumed.');
+        }
+
+        $this->gateway->resume($subscription->gateway_subscription_id);
+        $subscription->update(['status' => SubscriptionStatus::Active, 'cancel_at_period_end' => false, 'canceled_at' => null]);
     }
 
     public function expire(Subscription $subscription): void

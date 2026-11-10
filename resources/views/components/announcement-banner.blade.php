@@ -3,7 +3,7 @@
 @endphp
 
 @if ($announcements->isNotEmpty())
-    <div class="w-full flex flex-col space-y-1" role="region" aria-label="Announcements">
+    <div class="relative z-50 w-full flex flex-col space-y-1" role="region" aria-label="Announcements">
         @foreach ($announcements as $announcement)
             @php
                 $themeClasses = match ($announcement->kind) {
