@@ -30,11 +30,15 @@ class TitleSearchController extends Controller
         }
 
         $escaped = addcslashes($term, '%_');
+        // Strip MySQL FULLTEXT boolean operators so a user query like
+        // "1; DROP TABLE--" does not produce a syntax error in AGAINST().
+        $fulltextTerm = preg_replace('/[+\-~<>()"*@]/', ' ', $escaped) ?? $escaped;
+        $fulltextTerm = trim($fulltextTerm).'*';
         $local = Title::query()
             ->where('adult', false)
             ->where('is_hidden', false)
-            ->where(function ($query) use ($escaped) {
-                $query->whereRaw('MATCH(title, original_title) AGAINST(? IN BOOLEAN MODE)', [$escaped.'*'])
+            ->where(function ($query) use ($escaped, $fulltextTerm) {
+                $query->whereRaw('MATCH(title, original_title) AGAINST(? IN BOOLEAN MODE)', [$fulltextTerm])
                     ->orWhere('title', 'LIKE', "%{$escaped}%")
                     ->orWhere('original_title', 'LIKE', "%{$escaped}%");
             })

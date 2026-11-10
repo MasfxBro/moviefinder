@@ -1,0 +1,53 @@
+name: PHP CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        ports:
+          - 3306/tcp
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: moviefinder
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.5'
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest --no-interaction
+
+    - name: Run Pint
+      run: vendor/bin/pint
+
+    - name: Run Larastan
+      run: vendor/bin/larastan
+
+    - name: Run Pest
+      run: vendor/bin/pest
+
+    - name: Run build
+      run: npm run build
+
+    - name: Run composer audit
+      run: composer audit
+
+    - name: Run npm audit
+      run: npm audit
