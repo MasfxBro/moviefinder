@@ -35,8 +35,16 @@ class BillingController extends Controller
         return view('pricing', [
             'plans' => $plans,
             'methods' => [
-                'plus' => $settings->get('billing.methods.plus.manual', config('billing.methods.plus.manual')),
-                'pro' => $settings->get('billing.methods.pro.manual', config('billing.methods.pro.manual')),
+                'plus' => (static function () use ($settings): array {
+                    $v = $settings->get('billing.methods.plus.manual') ?? config('billing.methods.plus.manual', []);
+
+                    return is_array($v) ? $v : [];
+                })(),
+                'pro' => (static function () use ($settings): array {
+                    $v = $settings->get('billing.methods.pro.manual') ?? config('billing.methods.pro.manual', []);
+
+                    return is_array($v) ? $v : [];
+                })(),
             ],
             'isDemo' => config('app.launch_mode') === 'demo',
         ]);
@@ -51,12 +59,19 @@ class BillingController extends Controller
             'plan' => ['required', Rule::in(['plus', 'pro'])],
             'mode' => ['required', Rule::in(['auto', 'manual'])],
             'method' => ['required', 'string', 'max:30'],
-            'consent' => ['required_if:mode,auto', 'accepted'],
+            'consent' => ['exclude_unless:mode,auto', 'required', 'accepted'],
             'upgrade_confirm' => ['sometimes', 'accepted'],
         ]);
         $plan = Plan::from($data['plan']);
         $mode = $data['mode'];
-        $allowed = $settings->get("billing.methods.{$plan->value}.".($mode === 'auto' ? 'auto' : 'manual'), []);
+        $modeKey = $mode === 'auto' ? 'auto' : 'manual';
+        // Fall back to config() when Settings::get() returns null or a non-array value
+        // (no DB row, cached null, or malformed data stored in settings table).
+        $rawAllowed = $settings->get("billing.methods.{$plan->value}.{$modeKey}");
+        $allowed = is_array($rawAllowed)
+            ? $rawAllowed
+            : config("billing.methods.{$plan->value}.{$modeKey}", []);
+        $allowed = is_array($allowed) ? $allowed : [];
         if ($plan === Plan::Plus) {
             $allowed = array_values(array_diff($allowed, ['bank_transfer']));
         }

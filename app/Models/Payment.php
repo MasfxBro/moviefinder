@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\PaymentStatus;
 use App\Enums\Plan;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Plan $plan
  * @property int $id
  * @property PaymentStatus $status
+ * @property CarbonImmutable|null $paid_at
  */
 #[Fillable(['user_id', 'subscription_id', 'gateway_order_id', 'plan', 'method', 'amount', 'est_fee_idr', 'currency', 'status', 'paid_at', 'failure_reason'])]
 class Payment extends Model

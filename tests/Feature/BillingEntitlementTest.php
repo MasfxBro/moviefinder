@@ -66,15 +66,19 @@ it('simulates demo checkout and activates plan without a gateway call', function
     ])->assertRedirect();
 
     $payment = $user->payments()->latest()->firstOrFail();
-    $this->get(route('billing.demo.checkout', $payment))->assertOk()->assertSee('Simulasi saja. Tidak ada pembayaran atau biaya nyata.');
+    $this->get(route('billing.demo.checkout', $payment))->assertOk()->assertSee('Simulation only. No real payment or charge is made.');
     $this->post(route('billing.demo.complete', $payment))->assertRedirect(route('account.show'));
 
     $this->post(route('billing.checkout'), [
         'plan' => 'pro', 'mode' => 'manual', 'method' => 'bank_transfer', 'upgrade_confirm' => '1',
-    ])->assertRedirect(route('billing.demo.checkout', $user->payments()->latest()->first()));
+    ])->assertRedirect();
 
+    $proPayment = $user->payments()->where('plan', 'pro')->latest()->firstOrFail();
+    $this->get(route('billing.demo.checkout', $proPayment))->assertOk();
+
+    $plusPayment = $user->payments()->where('plan', 'plus')->latest()->firstOrFail();
     expect($user->fresh()->plan())->toBe(Plan::Plus)
-        ->and($user->payments()->latest()->first()->status)->toBe(PaymentStatus::Paid);
+        ->and($plusPayment->status)->toBe(PaymentStatus::Paid);
 });
 
 it('hides another user pending demo payment', function () {

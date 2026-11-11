@@ -45,14 +45,14 @@ class AdminReportController extends Controller
 
         $linkReport->update([
             'status' => 'resolved',
-            'resolved_by' => $request->user('admin')?->id ?? $request->user()?->id,
+            'resolved_by' => ($request->user('admin') ?? $request->user())?->id,
             'resolved_at' => now(),
             'details' => trim(($linkReport->details ? $linkReport->details."\n" : '').'Resolved: Restored clip link.'),
         ]);
 
         $this->auditLogger->log($request, 'link_report.restore', $linkReport, [
             'report_id' => $linkReport->id,
-            'clip_link_id' => $clipLink?->id,
+            'clip_link_id' => $clipLink !== null ? $clipLink->id : null,
         ]);
 
         return redirect()->route('admin.reports.index')->with('success', 'Clip link restored and report resolved.');
@@ -67,14 +67,14 @@ class AdminReportController extends Controller
 
         $linkReport->update([
             'status' => 'resolved',
-            'resolved_by' => $request->user('admin')?->id ?? $request->user()?->id,
+            'resolved_by' => ($request->user('admin') ?? $request->user())?->id,
             'resolved_at' => now(),
             'details' => trim(($linkReport->details ? $linkReport->details."\n" : '').'Resolved: Removed clip link.'),
         ]);
 
         $this->auditLogger->log($request, 'link_report.remove_link', $linkReport, [
             'report_id' => $linkReport->id,
-            'clip_link_id' => $clipLink?->id,
+            'clip_link_id' => $clipLink !== null ? $clipLink->id : null,
         ]);
 
         return redirect()->route('admin.reports.index')->with('success', 'Clip link removed and report resolved.');
@@ -96,14 +96,14 @@ class AdminReportController extends Controller
 
         $linkReport->update([
             'status' => 'resolved',
-            'resolved_by' => $request->user('admin')?->id ?? $request->user()?->id,
+            'resolved_by' => ($request->user('admin') ?? $request->user())?->id,
             'resolved_at' => now(),
             'details' => trim(($linkReport->details ? $linkReport->details."\n" : '').'Resolved: Blocked channel and removed links.'),
         ]);
 
         $this->auditLogger->log($request, 'link_report.block_channel', $linkReport, [
             'report_id' => $linkReport->id,
-            'channel_name' => $clipLink?->channel_name,
+            'channel_name' => $clipLink !== null ? $clipLink->channel_name : null,
         ]);
 
         return redirect()->route('admin.reports.index')->with('success', 'Channel blocked, all its links removed, and report resolved.');
@@ -119,7 +119,7 @@ class AdminReportController extends Controller
 
         $linkReport->update([
             'status' => 'resolved',
-            'resolved_by' => $request->user('admin')?->id ?? $request->user()?->id,
+            'resolved_by' => ($request->user('admin') ?? $request->user())?->id,
             'resolved_at' => now(),
             'details' => trim(($linkReport->details ? $linkReport->details."\n" : '').'Note: '.$note),
         ]);

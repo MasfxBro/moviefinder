@@ -59,12 +59,12 @@ class AdminRequestController extends Controller
     public function approve(Request $request, TitleRequest $titleRequest): RedirectResponse
     {
         $tmdbId = (int) $request->input('tmdb_id');
-        $mediaType = $request->input('media_type', $titleRequest->media_type->value);
+        $mediaTypeValue = $request->input('media_type', $titleRequest->media_type->value);
 
         $title = null;
         if ($tmdbId > 0) {
             try {
-                $title = $this->catalogService->import($tmdbId, MediaType::from($mediaType), bypassThrottle: true);
+                $title = $this->catalogService->import($tmdbId, MediaType::from((string) $mediaTypeValue), bypassThrottle: true);
             } catch (\Throwable $e) {
                 return redirect()->back()->with('error', "TMDB Import failed: {$e->getMessage()}");
             }

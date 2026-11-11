@@ -45,7 +45,7 @@ class AiMonitoringService
             'free_pool_used' => Cache::get('ai.free.pool_used', 0),
             'free_pool_limit' => config('ai.free.pool_daily_limit', 0),
             'queue_backlog' => Queue::size(),
-            'queue_failed' => Queue::failedJobs()->count(),
+            'queue_failed' => (int) DB::table('failed_jobs')->count(),
             'cache_hit_rate' => Cache::get('cache.hit_rate', null),
             'db_size_mb' => $this->dbSize(),
             'app_version' => app()->version(),

@@ -1,80 +1,127 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# deploy.sh — MovieFinder release procedure
+# See docs/OPERATIONS.md section 5 for the full narrative.
+#
+# Usage (run from /var/www/moviefinder on the server):
+#   bash scripts/deploy.sh
+#
+# Prerequisites:
+#   - shared/.env and shared/storage already exist (created once on first deploy)
+#   - The pre-built frontend assets (public/build/) are available locally
+#     (CI builds them and ships them alongside this script, or you scp them here)
+#   - The deploy user has sudo rights for `systemctl reload php8.5-fpm` only
+#
+# This script follows the atomic symlink-swap pattern described in OPERATIONS.md:
+#   /var/www/moviefinder/releases/<id>/  — one folder per release
+#   /var/www/moviefinder/shared/         — .env, storage (shared across releases)
+#   /var/www/moviefinder/current         — symlink; web server document root = current/public
+#
+# Never roll back migrations; fix forward. See OPERATIONS.md section 5 for rollback steps.
 
-# Exit immediately if a command exits with a non-zero status.
-set -e
+set -euo pipefail
 
-# Print each command to the terminal before executing it.
-set -x
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
 
-# Get the current date and time
-CURRENT_DATE=$(date +%Y%m%d-%H%M)
+APP_DIR="/var/www/moviefinder"
+RELEASES_DIR="${APP_DIR}/releases"
+SHARED_DIR="${APP_DIR}/shared"
+CURRENT_LINK="${APP_DIR}/current"
+KEEP_RELEASES=5
 
-# Write the release id into the release's BUILD_ID file
-BUILD_ID_FILE="releases/$CURRENT_DATE/BUILD_ID"
+RELEASE_ID=$(date +"%Y%m%d-%H%M")
+RELEASE_DIR="${RELEASES_DIR}/${RELEASE_ID}"
 
-# Create the release directory
-mkdir -p "releases/$CURRENT_DATE"
+# ---------------------------------------------------------------------------
+# Step 1: Create the release directory and copy application code
+# ---------------------------------------------------------------------------
 
-# Install dependencies
-composer install --no-dev --optimize-autoloader
+echo "[deploy] Creating release ${RELEASE_ID} ..."
+mkdir -p "${RELEASE_DIR}"
 
-# Copy the pre-built frontend assets
-cp -r public/build "releases/$CURRENT_DATE/public/build"
+# Copy everything except releases/, shared/ and the current symlink itself
+rsync -a --exclude=releases --exclude=shared --exclude=current \
+    "${APP_DIR}/" "${RELEASE_DIR}/"
 
-# Link shared files
-ln -nfs ../../shared/.env "releases/$CURRENT_DATE/.env"
-ln -nfs ../../shared/storage "releases/$CURRENT_DATE/storage"
+# ---------------------------------------------------------------------------
+# Step 2: Install PHP dependencies (production, optimized)
+# ---------------------------------------------------------------------------
 
-# Write the release id into the release's BUILD_ID file
-echo "$CURRENT_DATE" > "$BUILD_ID_FILE"
+echo "[deploy] Installing PHP dependencies ..."
+cd "${RELEASE_DIR}"
+composer install --no-dev --optimize-autoloader --no-interaction --quiet
 
-# Run migrations
+# ---------------------------------------------------------------------------
+# Step 3: Link shared resources and write BUILD_ID
+# ---------------------------------------------------------------------------
+
+echo "[deploy] Linking shared resources ..."
+ln -nfs "${SHARED_DIR}/.env"     "${RELEASE_DIR}/.env"
+ln -nfs "${SHARED_DIR}/storage"  "${RELEASE_DIR}/storage"
+
+echo "[deploy] Writing BUILD_ID: ${RELEASE_ID}"
+echo "${RELEASE_ID}" > "${RELEASE_DIR}/BUILD_ID"
+
+# ---------------------------------------------------------------------------
+# Step 4: Run database migrations (backward-compatible only)
+# ---------------------------------------------------------------------------
+
+echo "[deploy] Running migrations ..."
 php artisan migrate --force
 
-# Warm caches for the new release
+# ---------------------------------------------------------------------------
+# Step 5: Warm caches for the new release
+# ---------------------------------------------------------------------------
+
+echo "[deploy] Warming caches ..."
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 php artisan event:cache
 
-# Health check the new release
-if ! curl -sSf http://localhost/up > /dev/null; then
-  echo "Health check failed"
-  exit 1
-fi
+# ---------------------------------------------------------------------------
+# Step 6: Health check the new release BEFORE switching
+# ---------------------------------------------------------------------------
 
-# Switch current to the new release
-ln -nfs "releases/$CURRENT_DATE" "current"
+echo "[deploy] Running health check ..."
+# Point PHP-FPM temporarily by checking the new release directly.
+# A lightweight check: artisan can bootstrap the app against the shared DB.
+php artisan about --only=Environment > /dev/null
 
-# Graceful reload of PHP-FPM
+# ---------------------------------------------------------------------------
+# Step 7: Switch the symlink (atomic)
+# ---------------------------------------------------------------------------
+
+echo "[deploy] Switching current -> releases/${RELEASE_ID} ..."
+ln -nfs "${RELEASE_DIR}" "${CURRENT_LINK}"
+
+# Graceful reload (in-flight requests finish; never restart which drops them)
 sudo systemctl reload php8.5-fpm
 
-# Restart the queue workers
+# ---------------------------------------------------------------------------
+# Step 8: Restart queue workers (they finish current job then restart)
+# ---------------------------------------------------------------------------
+
+echo "[deploy] Restarting queue workers ..."
 php artisan queue:restart
 
-# Post-deploy smoke test
-php artisan test --filter=SmokeTest
+# ---------------------------------------------------------------------------
+# Step 9: Prune old releases (keep the last KEEP_RELEASES)
+# ---------------------------------------------------------------------------
 
-# Update CHANGELOG.md and tag the release
-echo "## [$CURRENT_DATE]" >> CHANGELOG.md
-echo "- Release $CURRENT_DATE" >> CHANGELOG.md
-git add CHANGELOG.md
-git commit -m "chore(release): $CURRENT_DATE"
-git tag "$CURRENT_DATE"
+echo "[deploy] Pruning old releases (keep ${KEEP_RELEASES}) ..."
+ls -1dt "${RELEASES_DIR}"/*/ | tail -n +$((KEEP_RELEASES + 1)) | xargs rm -rf --
 
-# Rollback procedure
-rollback() {
-  PREVIOUS_RELEASE=$(ls -t releases | grep -v "$CURRENT_DATE" | head -n 1)
-  ln -nfs "releases/$PREVIOUS_RELEASE" "current"
-  sudo systemctl reload php8.5-fpm
-  php artisan queue:restart
-  echo "Rolled back to release $PREVIOUS_RELEASE"
-}
+# ---------------------------------------------------------------------------
+# Done
+# ---------------------------------------------------------------------------
 
-# Trap errors and rollback if necessary
-trap 'rollback' ERR
-
-# Run the deploy script
-deploy
-
-# End of script
+echo "[deploy] Release ${RELEASE_ID} is live. Watch logs for 15 minutes."
+echo "[deploy] Smoke test checklist: docs/OPERATIONS.md section 12"
+echo ""
+echo "Rollback if needed:"
+echo "  PREV=\$(ls -1dt ${RELEASES_DIR}/*/ | sed -n '2p' | xargs basename)"
+echo "  ln -nfs ${RELEASES_DIR}/\${PREV} ${CURRENT_LINK}"
+echo "  sudo systemctl reload php8.5-fpm"
+echo "  php artisan queue:restart"

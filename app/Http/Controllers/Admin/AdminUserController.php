@@ -119,7 +119,7 @@ class AdminUserController extends Controller
     public function resetTour(Request $request, User $user)
     {
         // Reuse existing onboarding reset command (artisan) via service
-        app(OnboardingService::class)->resetTour($user);
+        app(OnboardingService::class)->reset($user);
         AdminAction::create([
             'admin_user_id' => $request->user('admin')->id,
             'target_user_id' => $user->id,

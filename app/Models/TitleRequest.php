@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property MediaType $media_type
+ * @property RequestStatus $status
+ */
 class TitleRequest extends Model
 {
     /** @use HasFactory<TitleRequestFactory> */

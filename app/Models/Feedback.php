@@ -37,11 +37,13 @@ class Feedback extends Model
         ];
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function handler(): BelongsTo
     {
         return $this->belongsTo(User::class, 'handled_by');

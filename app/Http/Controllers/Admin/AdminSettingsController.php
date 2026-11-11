@@ -9,6 +9,7 @@ use App\Services\AuditLogger;
 use App\Services\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AdminSettingsController extends Controller
@@ -18,7 +19,7 @@ class AdminSettingsController extends Controller
      */
     public function index(Settings $settings): View
     {
-        $all = \DB::table('settings')->orderBy('key')->get();
+        $all = DB::table('settings')->orderBy('key')->get();
 
         return view('admin.settings.index', ['settings' => $all]);
     }
@@ -50,7 +51,7 @@ class AdminSettingsController extends Controller
         $value = $value === null ? $validated['value'] : $value;
         $settings->set($key, $value, $request->user('admin')?->id);
         // audit
-        app(AuditLogger::class)->log($request, 'settings.update', $key, ['old' => $old, 'new' => $validated['value']]);
+        app(AuditLogger::class)->log($request, 'settings.update', null, ['key' => $key, 'old' => $old, 'new' => $validated['value']]);
 
         return redirect()->back()->with('success', "Setting {$key} updated.");
     }

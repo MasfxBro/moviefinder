@@ -75,8 +75,8 @@ class AdminClipLinkController extends Controller
         ]);
 
         $parsed = PlatformUrl::parse($validated['url']);
-        $platform = $parsed?->platform ?? 'other';
-        $videoId = $parsed?->videoId;
+        $platform = $parsed !== null ? $parsed->platform : 'other';
+        $videoId = $parsed !== null ? $parsed->videoId : null;
         $channelName = null;
         $channelId = null;
 
@@ -91,7 +91,7 @@ class AdminClipLinkController extends Controller
             'title_id' => $validated['title_id'],
             'video_platform' => $platform === 'youtube' ? 'youtube' : 'other',
             'video_id' => $videoId,
-            'url' => $parsed?->canonicalUrl ?? $validated['url'],
+            'url' => $parsed !== null ? $parsed->canonicalUrl : $validated['url'],
             'channel_name' => $channelName,
             'channel_id' => $channelId,
             'label' => $validated['label'] ?: 'Clip',
@@ -99,7 +99,7 @@ class AdminClipLinkController extends Controller
             'source' => 'admin',
             'status' => 'active',
             'verified_at' => now(),
-            'created_by' => $request->user('admin')?->id ?? $request->user()?->id,
+            'created_by' => ($request->user('admin') ?? $request->user())?->id,
         ]);
 
         $this->auditLogger->log($request, 'clip_link.create', $clipLink, [
@@ -131,14 +131,14 @@ class AdminClipLinkController extends Controller
         ]);
 
         $parsed = PlatformUrl::parse($validated['url']);
-        $platform = $parsed?->platform ?? 'other';
-        $videoId = $parsed?->videoId;
+        $platform = $parsed !== null ? $parsed->platform : 'other';
+        $videoId = $parsed !== null ? $parsed->videoId : null;
 
         $clipLink->update([
             'title_id' => $validated['title_id'],
             'video_platform' => $platform === 'youtube' ? 'youtube' : 'other',
             'video_id' => $videoId,
-            'url' => $parsed?->canonicalUrl ?? $validated['url'],
+            'url' => $parsed !== null ? $parsed->canonicalUrl : $validated['url'],
             'label' => $validated['label'],
             'trust' => $validated['trust'],
             'status' => $validated['status'],

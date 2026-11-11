@@ -153,13 +153,12 @@ class ProcessMidtransWebhook implements ShouldQueue
 
             return;
         }
-        if ($isVerifiedSuccess && ! is_string($transactionId)) {
-            DB::table('webhook_events')->where('id', $event->id)->update(['processed_at' => now()]);
 
-            return;
-        }
+        // When $isVerifiedSuccess is true, $transactionId was already confirmed as string
+        // by the check in line above: $isVerifiedSuccess = is_string($transactionId) && ...
+        $confirmedTransactionId = is_string($transactionId) ? $transactionId : ('event-'.$event->id);
 
-        $orderId = 'midtrans-recurring-'.($transactionId ?? 'event-'.$event->id);
+        $orderId = 'midtrans-recurring-'.$confirmedTransactionId;
         $payment = Payment::query()->firstOrCreate(
             ['gateway_order_id' => $orderId],
             [

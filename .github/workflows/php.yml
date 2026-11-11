@@ -1,53 +1,135 @@
-name: PHP CI
+name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build:
+  test:
+    name: PHP ${{ matrix.php }} / Node ${{ matrix.node }} / MySQL 8.4
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        php: ["8.5"]
+        node: ["26"]   # Node 26 LTS (promoted late October 2026); update to next LTS when available
 
     services:
       mysql:
         image: mysql:8.4
-        ports:
-          - 3306/tcp
         env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: moviefinder
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: moviefinder_test
+          MYSQL_USER: moviefinder
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.5'
+      - name: Set up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, fileinfo, gd, intl, mbstring, openssl, pdo_mysql, zip
+          coverage: none
+          tools: composer:v2
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest --no-interaction
+      - name: Set up Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
 
-    - name: Run Pint
-      run: vendor/bin/pint
+      # ------------------------------------------------------------------ #
+      # PHP dependencies                                                     #
+      # ------------------------------------------------------------------ #
 
-    - name: Run Larastan
-      run: vendor/bin/larastan
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
-    - name: Run Pest
-      run: vendor/bin/pest
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
-    - name: Run build
-      run: npm run build
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-    - name: Run composer audit
-      run: composer audit
+      # ------------------------------------------------------------------ #
+      # JS dependencies and frontend build                                  #
+      # ------------------------------------------------------------------ #
 
-    - name: Run npm audit
-      run: npm audit
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      # ------------------------------------------------------------------ #
+      # Application environment                                             #
+      # ------------------------------------------------------------------ #
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      # ------------------------------------------------------------------ #
+      # Code quality                                                        #
+      # ------------------------------------------------------------------ #
+
+      - name: Run Pint (lint)
+        run: vendor/bin/pint --test
+
+      - name: Run Larastan (static analysis)
+        run: vendor/bin/phpstan analyse --no-progress
+
+      # ------------------------------------------------------------------ #
+      # Tests                                                               #
+      # ------------------------------------------------------------------ #
+
+      - name: Run migrations on test database
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: moviefinder_test
+          DB_USERNAME: moviefinder
+          DB_PASSWORD: secret
+        run: php artisan migrate --force
+
+      - name: Run Pest test suite
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: moviefinder_test
+          DB_USERNAME: moviefinder
+          DB_PASSWORD: secret
+          AI_DRIVER: fake
+        run: php artisan test --compact
+
+      # ------------------------------------------------------------------ #
+      # Security audits                                                     #
+      # ------------------------------------------------------------------ #
+
+      - name: Composer security audit
+        run: composer audit
+
+      - name: npm security audit
+        run: npm audit --audit-level=high

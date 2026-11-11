@@ -59,8 +59,7 @@ class PosterService
         $image = match ($mime) {
             'image/jpeg' => @imagecreatefromjpeg($realPath),
             'image/png' => @imagecreatefrompng($realPath),
-            'image/webp' => @imagecreatefromwebp($realPath),
-            default => false,
+            default => @imagecreatefromwebp($realPath), // 'image/webp' — the only remaining allowed MIME
         };
 
         if ($image === false) {

@@ -29,16 +29,19 @@ class LinkReport extends Model
         ];
     }
 
+    /** @return BelongsTo<ClipLink, $this> */
     public function clipLink(): BelongsTo
     {
         return $this->belongsTo(ClipLink::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function resolver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');

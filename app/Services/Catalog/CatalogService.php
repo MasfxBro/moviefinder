@@ -278,7 +278,7 @@ class CatalogService
 
         foreach ($items as $item) {
             $tmdbId = $item['id'];
-            $type = $item['type'] ?? MediaType::Movie;
+            $type = $item['type'] instanceof MediaType ? $item['type'] : MediaType::from((string) $item['type']);
             try {
                 $title = $this->importer->import($tmdbId, $type, bypassThrottle: $bypassThrottle);
                 $imported[] = $title;
